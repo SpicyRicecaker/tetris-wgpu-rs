@@ -1,3 +1,4 @@
+use futures::executor::block_on;
 use wgpu_test::wgpu_boilerplate;
 use wgpu_test::World;
 
@@ -5,26 +6,30 @@ use winit::dpi::LogicalSize;
 use winit::dpi::Size;
 use winit::window::WindowBuilder;
 use winit::{
-    event::{Event, WindowEvent},
+    event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::Window,
 };
 
 fn main() {
     // Create event loop
     let event_loop = EventLoop::new();
     // Create window
-    let builder = WindowBuilder::new().with_min_inner_size(Size::Logical(LogicalSize {
-        width: 1920_f64,
-        height: 1080_f64,
-    }));
+    let builder = WindowBuilder::new()
+        .with_min_inner_size(Size::Logical(LogicalSize {
+            width: 1920_f64,
+            height: 1080_f64,
+        }))
+        .with_visible(false);
     let window = builder.build(&event_loop).unwrap();
 
     // Create some mobs
-    let world = World::default();
+    let mut world = World::default();
 
     // Init wgpu the whole reason we're playing the game lol
-    wgpu_boilerplate::init(&window);
+    let mut state = block_on(wgpu_boilerplate::State::new(&window));
+    state.render(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
+
+    window.set_visible(true);
 
     // Here's the 'game loop'
     event_loop.run(move |event, _, control_flow| {
@@ -33,12 +38,28 @@ fn main() {
 
         // world.tick,
         match event {
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => {
-                println!("Close button pressed");
-                *control_flow = ControlFlow::Exit;
+            Event::WindowEvent { ref event, .. } => {
+                if !state.input(event) {
+                    match event {
+                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::KeyboardInput { input, .. } => {
+                            handle_input(input, control_flow)
+                        }
+                        WindowEvent::Resized(size) => state.resize(*size),
+                        WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                            // new_inner_size is &&mut so we have to dereference it twice
+                            state.resize(**new_inner_size);
+                        }
+                        WindowEvent::CursorMoved { position, .. } => {
+                            *world.cursor_pos_mut() = (position.x, position.y);
+                        }
+                        WindowEvent::MouseWheel { delta, .. } => {
+                            dbg!(delta);
+                            world.handle_scroll(delta);
+                        }
+                        _ => (),
+                    }
+                }
             }
             Event::MainEventsCleared => {
                 // After tick you redraw stuff?
@@ -46,9 +67,20 @@ fn main() {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
-                // world.render
+                world.render(&mut state);
             }
             _ => (),
         }
     });
+}
+
+fn handle_input(input: &KeyboardInput, control_flow: &mut ControlFlow) {
+    if let KeyboardInput {
+        state: ElementState::Pressed,
+        virtual_keycode: Some(VirtualKeyCode::Escape),
+        ..
+    } = input
+    {
+        *control_flow = ControlFlow::Exit
+    }
 }
