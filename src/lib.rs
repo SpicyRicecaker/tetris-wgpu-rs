@@ -94,6 +94,8 @@ impl World {
 
         // state.render().unwrap();
         self.render_mouse(state);
+
+
     }
 
     fn render_mouse(&self, state: &mut State) {
@@ -103,7 +105,7 @@ impl World {
         let scroll_fraction = self.scroll_pos / 1.0;
 
         state
-            .render(x_fraction, y_fraction, scroll_fraction, 1.0_f64)
+            .render_background(x_fraction, y_fraction, scroll_fraction, 1.0_f64)
             .unwrap();
     }
 

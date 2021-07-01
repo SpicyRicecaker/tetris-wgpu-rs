@@ -2,7 +2,13 @@ use super::State;
 
 // Challenge for movign cursor
 impl State {
-    pub fn render(&mut self, r: f64, g: f64, b: f64, a: f64) -> Result<(), wgpu::SwapChainError> {
+    pub fn render_background(
+        &mut self,
+        r: f64,
+        g: f64,
+        b: f64,
+        a: f64,
+    ) -> Result<(), wgpu::SwapChainError> {
         let frame = self.swap_chain.get_current_frame()?.output;
         let mut encoder = self
             .device
@@ -29,5 +35,16 @@ impl State {
 
         Ok(())
     }
-}
 
+    pub fn swap_render_pipeline(&mut self) {
+        match self.selected_rd_pipeline_idx {
+            1 => {
+                self.selected_rd_pipeline_idx = 0;
+            }
+            0 => {
+                self.selected_rd_pipeline_idx = 1;
+            }
+            _ => (),
+        };
+    }
+}
