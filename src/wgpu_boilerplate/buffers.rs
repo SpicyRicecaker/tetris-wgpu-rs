@@ -9,7 +9,7 @@ pub struct Vertex {
 }
 
 // ccw: top, bot left, bot right
-pub const VERTICES: &[Vertex] = &[
+pub const VERTICES_PENTAGON: &[Vertex] = &[
     Vertex {
         position: [-0.0868241, 0.49240386, 0.0],
         color: [0.5, 0.0, 0.5],
@@ -32,7 +32,48 @@ pub const VERTICES: &[Vertex] = &[
     }, // E
 ];
 
-pub const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
+pub const INDICES_PENTAGON: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
+
+// ccw: top, bot left, bot right
+pub const VERTICES_HEXAGON: &[Vertex] = &[
+    Vertex {
+        position: [-0.5, -0.5, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // A = 0
+    Vertex {
+        position: [0.5, -0.5, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // B = 1
+    Vertex {
+        position: [0.8, 0.0, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // C = 2
+    Vertex {
+        position: [0.5, 0.5, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // D = 3
+    Vertex {
+        position: [-0.5, 0.5, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // E = 4
+    Vertex {
+        position: [-0.8, 0.0, 0.0],
+        color: [0.5, 0.5, 0.5],
+    }, // F = 5
+    Vertex {
+        position: [0.0, 0.0, 0.0],
+        color: [0.5, 0.5, 0.5],
+    }, // G = 6
+];
+
+pub const INDICES_HEXAGON: &[u16] = &[
+    0, 1, 6, // abg
+    1, 6, 2, // bgc
+    3, 6, 2, // dgc
+    4, 6, 3, // egd
+    4, 6, 5, // egf
+    5, 6, 0, // fga
+];
 
 impl Vertex {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {

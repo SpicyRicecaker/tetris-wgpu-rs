@@ -3,10 +3,7 @@ pub mod challenges;
 use wgpu::util::DeviceExt;
 use winit::{dpi::PhysicalSize, event::WindowEvent, window::Window};
 
-use crate::{
-    wgpu_boilerplate::buffers::{Vertex, INDICES, VERTICES},
-    World,
-};
+use crate::World;
 
 pub struct State {
     surface: wgpu::Surface,
@@ -17,9 +14,10 @@ pub struct State {
     size: PhysicalSize<u32>,
     render_pipelines: Vec<wgpu::RenderPipeline>,
     selected_rd_pipeline_idx: usize,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
-    num_indices: u32,
+    vertex_buffers: [wgpu::Buffer; 2],
+    index_buffers: [wgpu::Buffer; 2],
+    selected_buffer_idx: usize,
+    num_indices: [u32; 2],
 }
 
 impl State {
@@ -78,7 +76,7 @@ impl State {
                 // Specify the entry point function for shaders, set by [[stage(fragment)]]
                 entry_point: "main",
                 // We should pass in info into the shader itself, right now we're creating it in the shader for hello world
-                buffers: &[Vertex::desc()],
+                buffers: &[buffers::Vertex::desc()],
             },
             // Fragment technically opt
             fragment: Some(wgpu::FragmentState {
@@ -118,7 +116,7 @@ impl State {
                 // Specify the entry point function for shaders, set by [[stage(fragment)]]
                 entry_point: "main",
                 // We should pass in info into the shader itself, right now we're creating it in the shader for hello world
-                buffers: &[Vertex::desc()],
+                buffers: &[buffers::Vertex::desc()],
             },
             // Fragment technically opt
             fragment: Some(wgpu::FragmentState {
@@ -154,19 +152,39 @@ impl State {
 
         let selected_rd_pipeline_idx = 0;
 
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let vertex_buffer_pentagon = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(buffers::VERTICES),
+            contents: bytemuck::cast_slice(buffers::VERTICES_PENTAGON),
             usage: wgpu::BufferUsage::VERTEX,
         });
 
-        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let index_buffer_pentagon = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
-            contents: bytemuck::cast_slice(INDICES),
+            contents: bytemuck::cast_slice(buffers::INDICES_PENTAGON),
             usage: wgpu::BufferUsage::INDEX,
         });
 
-        let num_indices = INDICES.len() as u32;
+        let vertex_buffer_hexagon = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(buffers::VERTICES_PENTAGON),
+            usage: wgpu::BufferUsage::VERTEX,
+        });
+
+        let index_buffer_hexagon = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Index Buffer"),
+            contents: bytemuck::cast_slice(buffers::INDICES_PENTAGON),
+            usage: wgpu::BufferUsage::INDEX,
+        });
+
+        let num_indices_pentagon = buffers::INDICES_PENTAGON.len() as u32;
+        let num_indices_hexagon = buffers::INDICES_HEXAGON.len() as u32;
+
+        let num_indices = [num_indices_pentagon, num_indices_hexagon];
+
+        let vertex_buffers = [vertex_buffer_pentagon, vertex_buffer_hexagon];
+        let index_buffers = [index_buffer_pentagon, index_buffer_hexagon];
+
+        let selected_buffer_idx = 0;
 
         Self {
             surface,
@@ -177,8 +195,9 @@ impl State {
             size,
             render_pipelines,
             selected_rd_pipeline_idx,
-            vertex_buffer,
-            index_buffer,
+            vertex_buffers,
+            index_buffers,
+            selected_buffer_idx,
             num_indices,
         }
     }
@@ -225,13 +244,12 @@ impl State {
             render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
             // slot = what buffer slot to use for buffer (can have mult buffers)
             // 2nd = slice of buffer to use
-            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.set_index_buffer( self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.num_indices,0, 0..1);
+            render_pass.set_vertex_buffer(0, self.vertex_buffers[self.selected_buffer_idx].slice(..));
+            render_pass.set_index_buffer(self.index_buffers[self.selected_buffer_idx].slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..self.num_indices[self.selected_buffer_idx], 0, 0..1);
         }
         self.queue.submit(std::iter::once(encoder.finish()));
-
-        Ok(())
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq12aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaqzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzxxxxxxxxxxxxxxdccccccccccccccccccccccccccccccccccccccccccccccccccccccccccceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr44444444444444444444444444444444444444444444444444rrrrrrrrrrrrrrrrrrrrrrrrrryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyuuuuuuuuuuuuuuuuuuuuuuuuuuuuiiiiiiiiiiiiiiiiiiiiiiiiiiii77777777777766666666655555555555555554444444444eeeeeeefffffffffffffffffffffffffffffsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss33333333333333333333333333333333333334444(())
     }
 
     /// Get a reference to the state's size.
@@ -253,3 +271,4 @@ impl State {
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
     }
 }
+cccccccccccccccccccccccqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqwwwwwwwwwwwwwwwwqqqqqqqqqqqqqwwwwwwwwwwwwwwwwwwwwwwwwwwffffffffffffffffffffffffffffffffffffffgggggggggggggggggggggggggggggggggggggggggggggggggggggg
