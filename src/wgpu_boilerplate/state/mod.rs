@@ -72,14 +72,14 @@ impl State {
 
         let vertex_buffer_hexagon = Self::create_buffer(
             &device,
-            Some("Pentagon Vertex Buffer"),
+            Some("Hexagon Vertex Buffer"),
             bytemuck::cast_slice(buffers::VERTICES_HEXAGON),
             wgpu::BufferUsage::VERTEX,
         );
         let index_buffer_hexagon = Self::create_buffer(
             &device,
-            Some("Pentagon Index Buffer"),
-            bytemuck::cast_slice(buffers::VERTICES_HEXAGON),
+            Some("Hexagon Index Buffer"),
+            bytemuck::cast_slice(buffers::INDICES_HEXAGON),
             wgpu::BufferUsage::INDEX,
         );
 

@@ -37,24 +37,24 @@ impl State {
     }
 
     pub fn swap_render_pipeline(&mut self) {
-        match self.selected_rd_pipeline_idx {
-            1 => {
-                self.selected_rd_pipeline_idx = 0;
-            }
-            0 => {
-                self.selected_rd_pipeline_idx = 1;
-            }
-            _ => (),
-        };
+        // match self.selected_rd_pipeline_idx {
+        //     1 => {
+        //         self.selected_rd_pipeline_idx = 0;
+        //     }
+        //     0 => {
+        //         self.selected_rd_pipeline_idx = 1;
+        //     }
+        //     _ => (),
+        // };
     }
 
     pub fn swap_buffers(&mut self) {
-        match self.selected_rd_pipeline_idx {
+        match self.selected_buffer_idx {
             1 => {
-                self.selected_rd_pipeline_idx = 0;
+                self.selected_buffer_idx = 0;
             }
             0 => {
-                self.selected_rd_pipeline_idx = 1;
+                self.selected_buffer_idx = 1;
             }
             _ => (),
         };
