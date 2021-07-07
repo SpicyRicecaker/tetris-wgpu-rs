@@ -1,4 +1,4 @@
-use wgpu_boilerplate::State;
+use wgpu_boilerplate::state;
 use winit::event::MouseScrollDelta;
 
 pub mod wgpu_boilerplate;
@@ -89,7 +89,7 @@ impl World {
     fn tick(&mut self) {
         // self.entities.iter_mut().for_each(|p| p.tick())
     }
-    pub fn render(&self, state: &mut State) {
+    pub fn render(&self, state: &mut state::State) {
         // self.entities.iter().for_each(|p| p.render())
 
         // state.render().unwrap();
@@ -98,7 +98,7 @@ impl World {
 
     }
 
-    fn render_mouse(&self, state: &mut State) {
+    fn render_mouse(&self, state: &mut state::State) {
         // Get the fraction of scroll value
         let x_fraction = self.cursor_pos.0 / state.size().width as f64;
         let y_fraction = self.cursor_pos.1 / state.size().height as f64;

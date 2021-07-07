@@ -1,7 +1,7 @@
 use futures::executor::block_on;
+use wgpu_boilerplate::state::State;
 use wgpu_test::wgpu_boilerplate;
 use wgpu_test::World;
-use wgpu_boilerplate::State;
 
 use winit::dpi::LogicalSize;
 use winit::dpi::Size;
@@ -27,7 +27,7 @@ fn main() {
     let mut world = World::default();
 
     // Init wgpu the whole reason we're playing the game lol
-    let mut state = block_on(wgpu_boilerplate::State::new(&window));
+    let mut state = block_on(wgpu_boilerplate::state::State::new(&window));
     state.render_background(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
 
     window.set_visible(true);
@@ -70,7 +70,6 @@ fn main() {
             _ => (),
         }
     });
-
 }
 
 fn handle_input(state: &mut State, input: &KeyboardInput, control_flow: &mut ControlFlow) {
@@ -79,16 +78,16 @@ fn handle_input(state: &mut State, input: &KeyboardInput, control_flow: &mut Con
             state: ElementState::Pressed,
             virtual_keycode: Some(VirtualKeyCode::Escape),
             ..
-        } => {
-        *control_flow = ControlFlow::Exit
-        }
+        } => *control_flow = ControlFlow::Exit,
         KeyboardInput {
             state: ElementState::Pressed,
             virtual_keycode: Some(VirtualKeyCode::Space),
             ..
         } => {
             // change render pipeline
-            state.swap_render_pipeline();
+            // state.swap_render_pipeline();
+            // change buffers
+            state.swap_buffers();
         }
         _ => {}
     }
