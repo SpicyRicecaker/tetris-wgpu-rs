@@ -6,6 +6,7 @@ mod render_pipeline;
 mod shader;
 mod surface;
 mod swap_chain;
+mod texture;
 
 mod challenges;
 
@@ -25,6 +26,7 @@ pub struct State {
     selected_buffer_idx: usize,
     num_indices: [u32; 2],
     diffuse_bind_group: wgpu::BindGroup,
+    diffuse_texture: texture::Texture
 }
 
 impl State {
@@ -44,78 +46,10 @@ impl State {
 
         let swap_chain = Self::create_swap_chain(&sc_desc, &surface, &device);
 
-        use image::GenericImageView;
-
         let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
-        let diffuse_image = image::load_from_memory(diffuse_bytes).unwrap();
-        let diffuse_rgba = diffuse_image.as_rgba8().unwrap();
-
-        let dimensions = diffuse_image.dimensions();
-
-        let texture_size = wgpu::Extent3d {
-            width: dimensions.0,
-            height: dimensions.1,
-            depth_or_array_layers: 1,
-        };
-
-        let diffuse_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("diffuse_texture"),
-            // 1d/2d texture, sizes will be 1? 2d array textures size is # of 2d textures
-            size: texture_size,
-            // mipmaps are like downscaled textures that are used more at a distance, to reduce cpu & gpu load and reduce effects
-            // obv we don't have any rn so just set it to 1
-            mip_level_count: 1,
-            sample_count: 1,
-            // 2d dimension
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            // Sampled allows use in bind group, copy dst allows texture to be destintation in queue::write_texture
-            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::COPY_DST,
-        });
-
-        dbg!(dimensions.0, dimensions.1);
-
-        queue.write_texture(
-            wgpu::ImageCopyTexture {
-                // Texture to be copied to/from
-                texture: &diffuse_texture,
-                mip_level: 0,
-                // Place the texture is in corresponding to mipmap lvl
-                origin: wgpu::Origin3d::ZERO,
-            },
-            diffuse_rgba,
-            wgpu::ImageDataLayout {
-                // For non-compressed = 1
-                offset: 0,
-                // Show just be wxh , but
-                // why 4x?
-                bytes_per_row: std::num::NonZeroU32::new(4 * dimensions.0),
-                rows_per_image: std::num::NonZeroU32::new(dimensions.1),
-            },
-            texture_size,
-        );
-
-        let diffuse_texture_view =
-            diffuse_texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let diffuse_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
-            // What to do if coordinate is outside texture
-            // u = x
-            address_mode_u: wgpu::AddressMode::ClampToEdge,
-            // v = y
-            address_mode_v: wgpu::AddressMode::ClampToEdge,
-            // w = z
-            address_mode_w: wgpu::AddressMode::ClampToEdge,
-            // when image needs to be magnified, [linear] blend in the fragments, smooth but blurry
-            mag_filter: wgpu::FilterMode::Linear,
-            // when image needs to be scaled down, [nearest] color of nearest pixel, will be pixelated
-            min_filter: wgpu::FilterMode::Nearest,
-            // filtering between mipmap lvls
-            mipmap_filter: wgpu::FilterMode::Nearest,
-            ..Default::default()
-        });
+        let diffuse_texture = texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "memories.png").unwrap();
 
         // bindgroup = resources, & how shader can access them
-
         let texture_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 entries: &[
@@ -153,11 +87,11 @@ impl State {
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&diffuse_texture_view),
+                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&diffuse_sampler),
+                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
                 },
             ],
             label: Some("diffuse_bind_group"),
@@ -232,6 +166,7 @@ impl State {
             selected_buffer_idx,
             num_indices,
             diffuse_bind_group,
+            diffuse_texture
         }
     }
 }

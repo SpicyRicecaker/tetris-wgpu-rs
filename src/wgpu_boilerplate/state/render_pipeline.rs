@@ -5,7 +5,7 @@ impl State {
     pub fn create_render_pipeline_layout(device: &wgpu::Device, texture_bind_group_layout: &wgpu::BindGroupLayout) -> wgpu::PipelineLayout {
         device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Render Pipeline Layout"),
-            bind_group_layouts: &[&texture_bind_group_layout],
+            bind_group_layouts: &[texture_bind_group_layout],
             push_constant_ranges: &[],
         })
     }
@@ -76,7 +76,7 @@ impl State {
             // Fragment technically opt
             fragment: Some(wgpu::FragmentState {
                 module: shader,
-                entry_point: "main_2",
+                entry_point: "main",
                 // Target color output for swap chain, replace old pixels, and write to all colors
                 targets: &[wgpu::ColorTargetState {
                     format: sc_desc.format,
