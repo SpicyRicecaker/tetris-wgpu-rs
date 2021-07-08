@@ -41,6 +41,7 @@ impl State {
             });
 
             render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
+            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             // slot = what buffer slot to use for buffer (can have mult buffers)
             // 2nd = slice of buffer to use
             render_pass
