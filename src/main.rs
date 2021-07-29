@@ -64,7 +64,16 @@ fn main() {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
-                state.render().unwrap();
+                state.update();
+                match state.render() {
+                    Ok(_) => {}
+                    // Recreate the swap_chain if lost
+                    Err(wgpu::SwapChainError::Lost) => state.resize(*state.size()),
+                    // The system is out of memory, we should probably quit
+                    Err(wgpu::SwapChainError::OutOfMemory) => *control_flow = ControlFlow::Exit,
+                    // All other errors (Outdated, Timeout) should be resolved by the next frame
+                    Err(e) => eprintln!("{:?}", e),
+                };
                 // world.render(&mut state);
             }
             _ => (),

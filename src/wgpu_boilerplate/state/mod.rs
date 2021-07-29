@@ -11,6 +11,10 @@ mod texture;
 mod challenges;
 
 use super::buffers;
+use super::camera::Camera;
+use buffers::Uniforms;
+use wgpu::util::DeviceExt;
+use super::camera::camera_controller::CameraController;
 
 pub struct State {
     surface: wgpu::Surface,
@@ -19,6 +23,11 @@ pub struct State {
     sc_desc: wgpu::SwapChainDescriptor,
     swap_chain: wgpu::SwapChain,
     size: winit::dpi::PhysicalSize<u32>,
+    camera: Camera,
+    camera_controller: CameraController,
+    uniforms: Uniforms,
+    uniform_buffer: wgpu::Buffer,
+    uniform_bind_group: wgpu::BindGroup,
     render_pipelines: Vec<wgpu::RenderPipeline>,
     selected_rd_pipeline_idx: usize,
     vertex_buffers: [wgpu::Buffer; 2],
@@ -26,7 +35,7 @@ pub struct State {
     selected_buffer_idx: usize,
     num_indices: [u32; 2],
     diffuse_bind_group: wgpu::BindGroup,
-    diffuse_texture: texture::Texture
+    diffuse_texture: texture::Texture,
 }
 
 impl State {
@@ -47,7 +56,8 @@ impl State {
         let swap_chain = Self::create_swap_chain(&sc_desc, &surface, &device);
 
         let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
-        let diffuse_texture = texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "memories.png").unwrap();
+        let diffuse_texture =
+            texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "memories.png").unwrap();
 
         // bindgroup = resources, & how shader can access them
         let texture_bind_group_layout =
@@ -97,9 +107,56 @@ impl State {
             label: Some("diffuse_bind_group"),
         });
 
+        let camera = Camera::new(sc_desc.width as f32, sc_desc.height as f32);
+
+        let camera_controller: CameraController = CameraController::new(0.2);
+
+        let mut uniforms = Uniforms::new();
+        uniforms.update_view_proj(&camera);
+
+        let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Uniform Buffer"),
+            contents: bytemuck::cast_slice(&[uniforms]),
+            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+        });
+
+        // recall, bindgroup are resources that the gpu can access through specified shaders
+        let uniform_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    // layout
+                    binding: 0,
+                    // visible only to vertex stage shaders
+                    visibility: wgpu::ShaderStage::VERTEX,
+                    // ty = type of binding
+                    ty: wgpu::BindingType::Buffer {
+                        // uniform value buffer
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: Some("uniform_bind_group_layout"),
+            });
+
+        // create uniform bind group
+        let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &uniform_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniform_buffer.as_entire_binding(),
+            }],
+            label: Some("uniform_bind_group"),
+        });
+
         let shader = Self::create_shader(&device);
 
-        let render_pipeline_layout = Self::create_render_pipeline_layout(&device, &texture_bind_group_layout);
+        let render_pipeline_layout = Self::create_render_pipeline_layout(
+            &device,
+            &texture_bind_group_layout,
+            &uniform_bind_group_layout,
+        );
 
         let render_pipeline_1 =
             Self::create_render_pipeline(&render_pipeline_layout, &sc_desc, &device, &shader);
@@ -159,6 +216,11 @@ impl State {
             sc_desc,
             swap_chain,
             size,
+            camera,
+            camera_controller,
+            uniforms,
+            uniform_buffer,
+            uniform_bind_group,
             render_pipelines,
             selected_rd_pipeline_idx,
             vertex_buffers,
@@ -166,7 +228,7 @@ impl State {
             selected_buffer_idx,
             num_indices,
             diffuse_bind_group,
-            diffuse_texture
+            diffuse_texture,
         }
     }
 }

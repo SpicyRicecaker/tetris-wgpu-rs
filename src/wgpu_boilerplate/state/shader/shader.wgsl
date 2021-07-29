@@ -1,5 +1,15 @@
 // Vertex shader
 
+// uniform shaders use block
+[[block]]
+struct Uniforms {
+    view_proj: mat4x4<f32>;
+};
+// inside the render_pipeline_layout, the idx corresponsinds to idx in group
+// group(0) would be the texture_binding
+[[group(1), binding(0)]]
+var<uniform> uniforms: Uniforms;
+
 // Vertex output stores the inputs and outputs of our vertex shader
 struct VertexInput {
     [[location(0)]] position: vec3<f32>;
@@ -18,7 +28,8 @@ fn main (
 ) -> VertexOutput {
     var out: VertexOutput;
     out.tex_coords = model.tex_coords;
-    out.clip_position = vec4<f32>(model.position, 1.0);
+    out.clip_position = uniforms.view_proj * vec4<f32>(model.position, 1.0);
+    // out.clip_position = vec4<f32>(model.position, 1.0);
     return out;
 }
 

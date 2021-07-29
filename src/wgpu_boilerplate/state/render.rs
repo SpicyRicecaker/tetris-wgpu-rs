@@ -2,7 +2,7 @@ use super::State;
 use crate::World;
 impl State {
     pub fn input(&mut self, event: &winit::event::WindowEvent, world: &mut World) -> bool {
-        // return false;
+        self.camera_controller.process_events(event);
         match event {
             winit::event::WindowEvent::CursorMoved { position, .. } => {
                 *world.cursor_pos_mut() = (position.x, position.y);
@@ -12,7 +12,15 @@ impl State {
         }
     }
 
-    pub fn update(&mut self) {}
+    pub fn update(&mut self) {
+        self.camera_controller.update_camera(&mut self.camera);
+        self.uniforms.update_view_proj(&self.camera);
+        self.queue.write_buffer(
+            &self.uniform_buffer,
+            0,
+            bytemuck::cast_slice(&[self.uniforms]),
+        );
+    }
     pub fn render(&mut self) -> Result<(), wgpu::SwapChainError> {
         let frame = self.swap_chain.get_current_frame()?.output;
         let mut encoder = self
@@ -42,6 +50,8 @@ impl State {
 
             render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+            // Index is 1 since it's the second
+            render_pass.set_bind_group(1, &self.uniform_bind_group, &[]);
             // slot = what buffer slot to use for buffer (can have mult buffers)
             // 2nd = slice of buffer to use
             render_pass

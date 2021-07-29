@@ -1,3 +1,7 @@
+use cgmath::SquareMatrix;
+
+use super::camera::Camera;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 // All vertices will have pos. and color
@@ -74,7 +78,7 @@ pub const INDICES_HEXAGON: &[u16] = &[
     3, 4, 6, // edg
     4, 5, 6, // efg
     5, 0, 6, // fag
-    0
+    0,
 ];
 
 impl Vertex {
@@ -101,5 +105,29 @@ impl Vertex {
                 },
             ],
         }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct Uniforms {
+    view_proj: [[f32; 4]; 4],
+}
+
+impl Uniforms {
+    pub fn new() -> Self {
+        Self {
+            // view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
+            view_proj: cgmath::Matrix4::identity().into()
+        }
+    }
+    pub fn update_view_proj(&mut self, camera: &Camera) {
+        self.view_proj = camera.build_view_projection_matrix().into();
+    }
+}
+
+impl Default for Uniforms {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,3 +1,4 @@
+use wgpu_boilerplate::camera;
 use wgpu_boilerplate::state;
 use winit::event::MouseScrollDelta;
 
