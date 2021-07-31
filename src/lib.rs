@@ -1,10 +1,11 @@
-use wgpu_boilerplate::camera;
+use event::{ElementState, VirtualKeyCode, WindowEvent};
 use wgpu_boilerplate::state;
-use winit::event::MouseScrollDelta;
+use winit::event;
 
 pub mod wgpu_boilerplate;
 
-struct Coord {
+#[derive(Debug)]
+pub struct Coord {
     x: u32,
     y: u32,
 }
@@ -15,8 +16,9 @@ impl Coord {
     }
 }
 
-struct Player {
-    location: Coord,
+pub struct Player {
+    pub location: Coord,
+    velocity: u32,
     thiccness: u32,
 }
 
@@ -33,11 +35,67 @@ impl Player {
 
 impl Default for Player {
     fn default() -> Self {
-        let location = Coord::new(10, 10);
+        let location = Coord::new(900, 900);
         let thiccness = 5;
+        let velocity = 10;
         Player {
             location,
             thiccness,
+            velocity,
+        }
+    }
+}
+
+pub struct Controller {
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
+}
+impl Default for Controller {
+    fn default() -> Self {
+        Controller {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+        }
+    }
+}
+impl Controller {
+    pub fn process_events(&mut self, event: &WindowEvent) -> bool {
+        match event {
+            WindowEvent::KeyboardInput {
+                input:
+                    winit::event::KeyboardInput {
+                        state,
+                        virtual_keycode: Some(keycode),
+                        ..
+                    },
+                ..
+            } => {
+                let is_pressed = *state == ElementState::Pressed;
+                match keycode {
+                    VirtualKeyCode::Up => {
+                        self.up = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::Down => {
+                        self.down = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::Left => {
+                        self.left = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::Right => {
+                        self.right = is_pressed;
+                        true
+                    }
+                    _ => false,
+                }
+            }
+            _ => false,
         }
     }
 }
@@ -48,9 +106,8 @@ struct Config {
     h: u32,
 }
 pub struct World {
-    entities: Vec<Player>,
-    scroll_pos: f64,
-    cursor_pos: (f64, f64),
+    pub player: Player,
+    pub controller: Controller,
 }
 enum Direction {
     Up,
@@ -58,76 +115,30 @@ enum Direction {
 }
 
 impl World {
-    fn change_scroll_pos(&mut self, direction: Direction) {
-        match direction {
-            Direction::Up => self.scroll_pos = (self.scroll_pos + 0.1).min(1.0),
-            Direction::Down => self.scroll_pos = (self.scroll_pos - 0.1).max(0.0),
+    pub fn tick(&mut self) {
+        if self.controller.up {
+            self.player.location.y += self.player.velocity;
+        }
+        if self.controller.down {
+            self.player.location.y -= self.player.velocity;
+        }
+        if self.controller.left {
+            self.player.location.x -= self.player.velocity;
+        }
+        if self.controller.right {
+            self.player.location.x += self.player.velocity;
         }
     }
-    pub fn handle_scroll(&mut self, delta: &MouseScrollDelta) {
-        let direction = match delta {
-            MouseScrollDelta::LineDelta(_, y) => {
-                if *y > 0_f32 {
-                    Direction::Up
-                } else if *y < 0_f32 {
-                    Direction::Down
-                } else {
-                    return;
-                }
-            }
-            MouseScrollDelta::PixelDelta(pos) => {
-                if pos.y > 0_f64 {
-                    Direction::Up
-                } else if pos.y < 0_f64 {
-                    Direction::Down
-                } else {
-                    return;
-                }
-            }
-        };
-        self.change_scroll_pos(direction);
-    }
-    fn tick(&mut self) {
-        // self.entities.iter_mut().for_each(|p| p.tick())
-    }
     pub fn render(&self, state: &mut state::State) {
-        // self.entities.iter().for_each(|p| p.render())
-
-        // state.render().unwrap();
-        self.render_mouse(state);
-
-
-    }
-
-    fn render_mouse(&self, state: &mut state::State) {
-        // Get the fraction of scroll value
-        let x_fraction = self.cursor_pos.0 / state.size().width as f64;
-        let y_fraction = self.cursor_pos.1 / state.size().height as f64;
-        let scroll_fraction = self.scroll_pos / 1.0;
-
-        state
-            .render_background(x_fraction, y_fraction, scroll_fraction, 1.0_f64)
-            .unwrap();
-    }
-
-    /// Get a mutable reference to the world's cursor pos.
-    pub fn cursor_pos_mut(&mut self) -> &mut (f64, f64) {
-        &mut self.cursor_pos
-    }
-
-    /// Get a mutable reference to the world's scroll pos.
-    pub fn scroll_pos_mut(&mut self) -> &mut f64 {
-        &mut self.scroll_pos
+        state.render().unwrap();
     }
 }
 
 impl Default for World {
     fn default() -> Self {
-        let players = vec![Player::default()];
         World {
-            entities: players,
-            scroll_pos: (0.5_f64),
-            cursor_pos: (50_f64, 50_f64),
+            player: Player::default(),
+            controller: Controller::default(),
         }
     }
 }

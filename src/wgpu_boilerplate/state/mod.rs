@@ -50,7 +50,6 @@ impl State {
         let adapter = Self::create_adapter(&instance, &surface).await;
 
         let (device, queue) = Self::create_device_queue(&adapter).await;
-
         let sc_desc = Self::create_swap_chain_descriptor(&surface, &size, &adapter);
 
         let swap_chain = Self::create_swap_chain(&sc_desc, &surface, &device);

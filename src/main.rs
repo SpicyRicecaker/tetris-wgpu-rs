@@ -51,9 +51,6 @@ fn main() {
                             // new_inner_size is &&mut so we have to dereference it twice
                             state.resize(**new_inner_size);
                         }
-                        WindowEvent::MouseWheel { delta, .. } => {
-                            world.handle_scroll(delta);
-                        }
                         _ => (),
                     }
                 }
@@ -64,7 +61,9 @@ fn main() {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
+                world.tick();
                 state.update();
+                dbg!(&world.player.location);
                 match state.render() {
                     Ok(_) => {}
                     // Recreate the swap_chain if lost

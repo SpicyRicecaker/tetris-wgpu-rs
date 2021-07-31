@@ -2,14 +2,8 @@ use super::State;
 use crate::World;
 impl State {
     pub fn input(&mut self, event: &winit::event::WindowEvent, world: &mut World) -> bool {
-        self.camera_controller.process_events(event);
-        match event {
-            winit::event::WindowEvent::CursorMoved { position, .. } => {
-                *world.cursor_pos_mut() = (position.x, position.y);
-                true
-            }
-            _ => false,
-        }
+        world.controller.process_events(event)
+        // self.camera_controller.process_events(event)
     }
 
     pub fn update(&mut self) {
