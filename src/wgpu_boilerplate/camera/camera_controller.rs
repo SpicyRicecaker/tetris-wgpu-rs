@@ -1,3 +1,4 @@
+use cgmath::Vector3;
 use winit::event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent};
 
 use super::Camera;
@@ -91,7 +92,10 @@ impl CameraController {
             camera.eye -= forward_norm * self.speed;
         }
 
+        // let right = forward_norm.cross(camera.up);
         let right = forward_norm.cross(camera.up);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        // println!("{:#?}", forward_norm.cross(camera.up));
 
         // Redo radius calc in case the up/ down is pressed.
         let forward = camera.target - camera.eye;
@@ -108,11 +112,11 @@ impl CameraController {
         }
         if self.is_up_pressed {
             camera.eye =
-                camera.target - (forward + (camera.up * self.speed)).normalize() * forward_mag;
+                camera.target - (forward + (up * self.speed)).normalize() * forward_mag;
         }
         if self.is_down_pressed {
             camera.eye =
-                camera.target - (forward - (camera.up * self.speed)).normalize() * forward_mag;
+                camera.target - (forward - (up * self.speed)).normalize() * forward_mag;
         }
     }
 }
