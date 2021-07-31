@@ -7,10 +7,10 @@ use super::camera::Camera;
 // All vertices will have pos. and color
 pub struct Vertex {
     // x, y, z of 3d spce
-    position: [f32; 3],
+    pub position: [f32; 3],
     // rgb
     // color: [f32; 3],
-    tex_coords: [f32; 2],
+    pub tex_coords: [f32; 2],
 }
 
 // ccw: top, bot left, bot right
@@ -37,7 +37,7 @@ pub const VERTICES_PENTAGON: &[Vertex] = &[
     }, // E
 ];
 
-pub const INDICES_PENTAGON: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
+// pub const INDICES_PENTAGON: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
 
 // ccw: top, bot left, bot right
 pub const VERTICES_HEXAGON: &[Vertex] = &[
@@ -71,15 +71,15 @@ pub const VERTICES_HEXAGON: &[Vertex] = &[
     }, // G = 6
 ];
 
-pub const INDICES_HEXAGON: &[u16] = &[
-    0, 1, 6, // abg
-    1, 2, 6, // bcg
-    2, 3, 6, // cdg
-    3, 4, 6, // edg
-    4, 5, 6, // efg
-    5, 0, 6, // fag
-    0,
-];
+// pub const INDICES_HEXAGON: &[u16] = &[
+//     0, 1, 6, // abg
+//     1, 2, 6, // bcg
+//     2, 3, 6, // cdg
+//     3, 4, 6, // edg
+//     4, 5, 6, // efg
+//     5, 0, 6, // fag
+//     0,
+// ];
 
 impl Vertex {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {

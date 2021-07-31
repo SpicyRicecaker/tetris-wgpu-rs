@@ -17,7 +17,7 @@ impl Camera {
             // x is your horizontal location <- ->
             // y is your vertical location V ^
             // z is how far away or close you are to obj
-            eye: (8.0, -8.0, 2.0).into(),
+            eye: (0.0, 0.0, 1.0).into(),
             target: (0.0, 0.0, 0.0).into(),
             up: (0.0, 1.0, 0.0).into(),
             aspect_ratio: width / height,

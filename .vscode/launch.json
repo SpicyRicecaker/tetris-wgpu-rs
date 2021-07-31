@@ -7,74 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Run, but debug",
-            "program": ".\\target\\debug\\wgpu_test.exe"
-            // "cargo": {
-            //     "args": [
-            //         "run",
-            //         // "--no-run",
-            //         // "--lib",
-            //         // "--package=wgpu_test"
-            //     ],
-            // },
-            // "args": [],
-            // "cwd": "${workspaceFolder}"
+            "name": "Debug binary 'wgpu_test'",
+            "cargo": {
+                "args": [
+                    "build",
+                ],
+            },
+            "program": ".\\target\\debug\\wgpu_test.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}"
         },
-        // {
-        //     "type": "lldb",
-        //     "request": "launch",
-        //     "name": "Debug unit tests in library 'wgpu_test'",
-        //     "cargo": {
-        //         "args": [
-        //             "test",
-        //             "--no-run",
-        //             "--lib",
-        //             "--package=wgpu_test"
-        //         ],
-        //         "filter": {
-        //             "name": "wgpu_test",
-        //             "kind": "lib"
-        //         }
-        //     },
-        //     "args": [],
-        //     "cwd": "${workspaceFolder}"
-        // },
-        // {
-        //     "type": "lldb",
-        //     "request": "launch",
-        //     "name": "Debug executable 'wgpu_test'",
-        //     "cargo": {
-        //         "args": [
-        //             "build",
-        //             "--bin=wgpu_test",
-        //             "--package=wgpu_test"
-        //         ],
-        //         "filter": {
-        //             "name": "wgpu_test",
-        //             "kind": "bin"
-        //         }
-        //     },
-        //     "args": [],
-        //     "cwd": "${workspaceFolder}"
-        // },
-        // {
-        //     "type": "lldb",
-        //     "request": "launch",
-        //     "name": "Debug unit tests in executable 'wgpu_test'",
-        //     "cargo": {
-        //         "args": [
-        //             "test",
-        //             "--no-run",
-        //             "--bin=wgpu_test",
-        //             "--package=wgpu_test"
-        //         ],
-        //         "filter": {
-        //             "name": "wgpu_test",
-        //             "kind": "bin"
-        //         }
-        //     },
-        //     "args": [],
-        //     "cwd": "${workspaceFolder}"
-        // }
     ]
 }

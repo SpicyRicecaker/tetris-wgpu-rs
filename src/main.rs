@@ -62,8 +62,7 @@ fn main() {
             }
             Event::RedrawRequested(_) => {
                 world.tick();
-                state.update();
-                dbg!(&world.player.location);
+                state.update(&mut world);
                 match state.render() {
                     Ok(_) => {}
                     // Recreate the swap_chain if lost

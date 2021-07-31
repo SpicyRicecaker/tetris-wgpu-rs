@@ -30,10 +30,11 @@ pub struct State {
     uniform_bind_group: wgpu::BindGroup,
     render_pipelines: Vec<wgpu::RenderPipeline>,
     selected_rd_pipeline_idx: usize,
-    vertex_buffers: [wgpu::Buffer; 2],
-    index_buffers: [wgpu::Buffer; 2],
+    pub vertex_buffers: [wgpu::Buffer; 2],
+    // index_buffers: [wgpu::Buffer; 2],
     selected_buffer_idx: usize,
-    num_indices: [u32; 2],
+    num_vertices: [u32; 2],
+    // num_indices: [u32; 2],
     diffuse_bind_group: wgpu::BindGroup,
     diffuse_texture: texture::Texture,
 }
@@ -173,12 +174,12 @@ impl State {
             bytemuck::cast_slice(buffers::VERTICES_PENTAGON),
             wgpu::BufferUsage::VERTEX,
         );
-        let index_buffer_pentagon = Self::create_buffer(
-            &device,
-            Some("Pentagon Index Buffer"),
-            bytemuck::cast_slice(buffers::INDICES_PENTAGON),
-            wgpu::BufferUsage::INDEX,
-        );
+        // let index_buffer_pentagon = Self::create_buffer(
+        //     &device,
+        //     Some("Pentagon Index Buffer"),
+        //     bytemuck::cast_slice(buffers::INDICES_PENTAGON),
+        //     wgpu::BufferUsage::INDEX,
+        // );
 
         let vertex_buffer_hexagon = Self::create_buffer(
             &device,
@@ -186,20 +187,23 @@ impl State {
             bytemuck::cast_slice(buffers::VERTICES_HEXAGON),
             wgpu::BufferUsage::VERTEX,
         );
-        let index_buffer_hexagon = Self::create_buffer(
-            &device,
-            Some("Hexagon Index Buffer"),
-            bytemuck::cast_slice(buffers::INDICES_HEXAGON),
-            wgpu::BufferUsage::INDEX,
-        );
+        // let index_buffer_hexagon = Self::create_buffer(
+        //     &device,
+        //     Some("Hexagon Index Buffer"),
+        //     bytemuck::cast_slice(buffers::INDICES_HEXAGON),
+        //     wgpu::BufferUsage::INDEX,
+        // );
 
-        let num_indices_pentagon = buffers::INDICES_PENTAGON.len() as u32;
-        let num_indices_hexagon = buffers::INDICES_HEXAGON.len() as u32;
+        // let num_indices_pentagon = buffers::INDICES_PENTAGON.len() as u32;
+        // let num_indices_hexagon = buffers::INDICES_HEXAGON.len() as u32;
 
-        let num_indices = [num_indices_pentagon, num_indices_hexagon];
+        let num_vertices_pentagon = buffers::VERTICES_PENTAGON.len() as u32;
+        let num_vertices_hexagon = buffers::VERTICES_HEXAGON.len() as u32;
+
+        let num_vertices = [num_vertices_pentagon, num_vertices_hexagon];
 
         let vertex_buffers = [vertex_buffer_pentagon, vertex_buffer_hexagon];
-        let index_buffers = [index_buffer_pentagon, index_buffer_hexagon];
+        // let index_buffers = [index_buffer_pentagon, index_buffer_hexagon];
 
         let selected_buffer_idx = 0;
 
@@ -223,9 +227,9 @@ impl State {
             render_pipelines,
             selected_rd_pipeline_idx,
             vertex_buffers,
-            index_buffers,
+            num_vertices,
             selected_buffer_idx,
-            num_indices,
+            // num_indices,
             diffuse_bind_group,
             diffuse_texture,
         }

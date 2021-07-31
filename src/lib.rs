@@ -1,5 +1,8 @@
 use event::{ElementState, VirtualKeyCode, WindowEvent};
-use wgpu_boilerplate::state;
+use wgpu_boilerplate::{
+    buffers::Vertex,
+    state::{self, State},
+};
 use winit::event;
 
 pub mod wgpu_boilerplate;
@@ -26,16 +29,73 @@ impl Player {
     fn tick(&mut self) {
         // If key pressed move
     }
-    fn render(&self) {
+    pub fn render(&self, state: &mut State) {
         // Draw a square at this pos
 
-        // drawSquare(x1, y1, x2, y2);
+        let x = self.location.x;
+        let y = self.location.y;
+
+        let window_height = state.size().height;
+        let window_width = state.size().width;
+
+        let l = self.thiccness as f32 / (window_width as f32 / 2.0);
+
+        let gl_y = (y as f32 - window_height as f32 / 2.0) / (window_height as f32 / 2.0);
+        let gl_x = (x as f32 - window_width as f32 / 2.0) / (window_width as f32 / 2.0);
+
+        // let vertices_player: &[Vertex] = &[
+        //     // Top right
+        //     Vertex {
+        //         position: [0.1, 0.1, 0.0],
+        //         tex_coords: [0.4, 0.00759614],
+        //     }, 
+        //     // Top left
+        //     Vertex {
+        //         position: [-0.1, 0.1, 0.0],
+        //         tex_coords: [0.0048, 0.43041354],
+        //     }, 
+        //     // bot left
+        //     Vertex {
+        //         position: [-0.1, -0.1, 0.0],
+        //         tex_coords: [0.28, 0.949],
+        //     }, 
+        //     // bot right
+        //     Vertex {
+        //         position: [0.1, -0.1, 0.0],
+        //         tex_coords: [0.85967, 0.847329],
+        //     },
+        // ];
+        // convert (x, y) -> (-1, 1) (-1, 1)
+        let vertices_player: &[Vertex] = &[
+            // Top right
+            Vertex {
+                position: [gl_x+l, gl_y+l, 0.0],
+                tex_coords: [0.4, 0.00759614],
+            }, 
+            // Top left
+            Vertex {
+                position: [gl_x-l, gl_y+l, 0.0],
+                tex_coords: [0.0048, 0.43041354],
+            }, 
+            // bot left
+            Vertex {
+                position: [gl_x-l, gl_y-l, 0.0],
+                tex_coords: [0.28, 0.949],
+            }, 
+            // bot right
+            Vertex {
+                position: [gl_x+l, gl_y-l, 0.0],
+                tex_coords: [0.85967, 0.847329],
+            },
+        ];
+
+        state.update_buffer(vertices_player);
     }
 }
 
 impl Default for Player {
     fn default() -> Self {
-        let location = Coord::new(900, 900);
+        let location = Coord::new(400, 300);
         let thiccness = 5;
         let velocity = 10;
         Player {
@@ -108,10 +168,6 @@ struct Config {
 pub struct World {
     pub player: Player,
     pub controller: Controller,
-}
-enum Direction {
-    Up,
-    Down,
 }
 
 impl World {

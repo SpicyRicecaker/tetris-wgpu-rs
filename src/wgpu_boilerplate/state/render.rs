@@ -6,7 +6,7 @@ impl State {
         // self.camera_controller.process_events(event)
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, world: &mut World) {
         self.camera_controller.update_camera(&mut self.camera);
         self.uniforms.update_view_proj(&self.camera);
         self.queue.write_buffer(
@@ -14,6 +14,7 @@ impl State {
             0,
             bytemuck::cast_slice(&[self.uniforms]),
         );
+        world.player.render(self);
     }
     pub fn render(&mut self) -> Result<(), wgpu::SwapChainError> {
         let frame = self.swap_chain.get_current_frame()?.output;
@@ -50,11 +51,13 @@ impl State {
             // 2nd = slice of buffer to use
             render_pass
                 .set_vertex_buffer(0, self.vertex_buffers[self.selected_buffer_idx].slice(..));
-            render_pass.set_index_buffer(
-                self.index_buffers[self.selected_buffer_idx].slice(..),
-                wgpu::IndexFormat::Uint16,
-            );
-            render_pass.draw_indexed(0..self.num_indices[self.selected_buffer_idx], 0, 0..1);
+            
+            render_pass.draw(0..self.num_vertices[self.selected_buffer_idx], 0..1)
+            // render_pass.set_index_buffer(
+            //     // self.index_buffers[self.selected_buffer_idx].slice(..),
+            //     wgpu::IndexFormat::Uint16,
+            // );
+            // render_pass.draw_indexed(0..self.num_indices[self.selected_buffer_idx], 0, 0..1);
         }
         self.queue.submit(std::iter::once(encoder.finish()));
         Ok(())
