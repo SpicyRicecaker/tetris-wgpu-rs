@@ -14,7 +14,10 @@ use super::buffers;
 use super::camera::camera_controller::CameraController;
 use super::camera::Camera;
 use buffers::Uniforms;
-use wgpu::{SwapChainTexture, TextureFormat, util::{DeviceExt, StagingBelt}};
+use wgpu::{
+    util::{DeviceExt, StagingBelt},
+    Color, SwapChainTexture, TextureFormat,
+};
 
 use wgpu_glyph::{ab_glyph, GlyphBrush, GlyphBrushBuilder, Section, Text};
 
@@ -31,8 +34,7 @@ impl FontInterface {
             ab_glyph::FontArc::try_from_slice(include_bytes!("..\\..\\..\\assets\\visitor2.ttf"))
                 .unwrap();
 
-        let glyph_brush = GlyphBrushBuilder::using_font(visitor)
-            .build(device, format);
+        let glyph_brush = GlyphBrushBuilder::using_font(visitor).build(device, format);
 
         Self {
             staging_belt,
@@ -44,13 +46,26 @@ impl FontInterface {
         self.staging_belt.finish()
     }
 
-    pub fn queue(&mut self, size: winit::dpi::PhysicalSize<u32>) {
+    pub fn queue(
+        &mut self,
+        size: winit::dpi::PhysicalSize<u32>,
+        text: &str,
+        x: f32,
+        y: f32,
+        color: Color,
+        scale: f32,
+    ) {
         self.glyph_brush.queue(Section {
-            screen_position: (30.0, 30.0),
+            screen_position: (x, y),
             bounds: (size.width as f32, size.height as f32),
-            text: vec![Text::new("Hello wgpu_glyph!")
-                .with_color([0.0, 0.0, 0.0, 1.0])
-                .with_scale(40.0)],
+            text: vec![Text::new(text)
+                .with_color([
+                    color.r as f32,
+                    color.g as f32,
+                    color.b as f32,
+                    color.a as f32,
+                ])
+                .with_scale(scale)],
             ..Section::default()
         });
     }
@@ -92,7 +107,7 @@ pub struct State {
     // num_indices: [u32; 2],
     pub font_interface: FontInterface,
 
-    camera: Camera,
+    pub camera: Camera,
     camera_controller: CameraController,
 
     uniforms: Uniforms,
@@ -122,7 +137,8 @@ impl State {
 
         let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
         let diffuse_texture =
-            texture::Texture::from_bytes(&device, &queue, format, diffuse_bytes, "memories.png").unwrap();
+            texture::Texture::from_bytes(&device, &queue, format, diffuse_bytes, "memories.png")
+                .unwrap();
 
         // bindgroup = resources, & how shader can access them
         let texture_bind_group_layout =

@@ -1,4 +1,5 @@
 use event::{ElementState, VirtualKeyCode, WindowEvent};
+use wgpu::Color;
 use wgpu_boilerplate::{
     buffers::Vertex,
     state::{self, State},
@@ -44,7 +45,32 @@ impl Player {
         let gl_y = (y as f32 - window_height as f32 / 2.0) / (window_height as f32 / 2.0);
         let gl_x = (x as f32 - window_width as f32 / 2.0) / (window_width as f32 / 2.0);
 
-        state.font_interface.queue(state.size);
+        state.font_interface.queue(
+            state.size,
+            &format!("Pos: ({}, {})", gl_x, gl_y),
+            x as f32,
+            (window_height - y) as f32,
+            Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+            40.0,
+        );
+        state.font_interface.queue(
+            state.size,
+            &format!("Zoom: ({})", state.camera.eye.z),
+            x as f32,
+            (window_height - y - 50) as f32,
+            Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+            40.0,
+        );
 
         // let gl_x = x as f32 / window_width as f32;
         // let gl_y = y as f32 / window_height as f32;
@@ -60,17 +86,17 @@ impl Player {
         //         // 0.1
         //         position: [0.1, 0.1, 0.0],
         //         tex_coords: [0.4, 0.00759614],
-        //     }, 
+        //     },
         //     // Top left
         //     Vertex {
         //         position: [-0.1, 0.1, 0.0],
         //         tex_coords: [0.0048, 0.43041354],
-        //     }, 
+        //     },
         //     // bot left
         //     Vertex {
         //         position: [-0.1, -0.1, 0.0],
         //         tex_coords: [0.28, 0.949],
-        //     }, 
+        //     },
         //     // bot right
         //     Vertex {
         //         position: [0.1, -0.1, 0.0],
@@ -82,26 +108,25 @@ impl Player {
         let vertices_player: &[Vertex] = &[
             // Top right
             Vertex {
-                position: [gl_x+l, gl_y+l, 0.0],
+                position: [gl_x + l, gl_y + l, 0.0],
                 tex_coords: [0.4, 0.00759614],
-            }, 
+            },
             // Top left
             Vertex {
-                position: [gl_x-l, gl_y+l, 0.0],
+                position: [gl_x - l, gl_y + l, 0.0],
                 tex_coords: [0.0048, 0.43041354],
-            }, 
+            },
             // bot left
             Vertex {
-                position: [gl_x-l, gl_y-l, 0.0],
+                position: [gl_x - l, gl_y - l, 0.0],
                 tex_coords: [0.28, 0.949],
-            }, 
+            },
             // // bot right
             // Vertex {
             //     position: [gl_x+l, gl_y-l, 0.0],
             //     tex_coords: [0.85967, 0.847329],
             // },
         ];
-
 
         state.update_buffer(vertices_player);
     }
