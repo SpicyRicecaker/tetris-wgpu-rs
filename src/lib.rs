@@ -20,6 +20,15 @@ impl Coord {
     }
 }
 
+// struct Bullet {
+//     pub location: Coord,
+//     velocity: f32,
+//     dx: f32,
+//     dy: f32,
+//     thiccness: u32,
+// }
+
+
 pub struct Player {
     pub location: Coord,
     velocity: u32,
