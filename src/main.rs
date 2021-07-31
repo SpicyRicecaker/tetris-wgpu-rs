@@ -11,12 +11,17 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
+
 fn main() {
     // Create event loop
     let event_loop = EventLoop::new();
     // Create window
     let builder = WindowBuilder::new()
         .with_min_inner_size(Size::Logical(LogicalSize {
+            width: 1920_f64,
+            height: 1080_f64,
+        }))
+        .with_inner_size(Size::Logical(LogicalSize {
             width: 1920_f64,
             height: 1080_f64,
         }))
@@ -28,6 +33,10 @@ fn main() {
 
     // Init wgpu the whole reason we're playing the game lol
     let mut state = block_on(wgpu_boilerplate::state::State::new(&window));
+
+    // Create stuff
+    
+
     state.render_background(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
 
     window.set_visible(true);

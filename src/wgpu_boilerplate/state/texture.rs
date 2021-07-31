@@ -1,5 +1,6 @@
 use image::GenericImageView;
 use anyhow::Result;
+use wgpu::TextureFormat;
 
 pub struct Texture {
     pub texture: wgpu::Texture,
@@ -11,17 +12,19 @@ impl Texture {
     pub fn from_bytes(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
+        format: TextureFormat,
         bytes: &[u8],
         label: &str
     ) -> Result<Self> {
         let img = image::load_from_memory(bytes)?;
-        Self::from_image(device, queue, &img, Some(label))
+        Self::from_image(device, queue, &img, format, Some(label))
     }
 
     pub fn from_image(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         img: &image::DynamicImage,
+        format: TextureFormat,
         label: Option<&str>
     ) -> Result<Self> {
         let rgba = img.as_rgba8().unwrap();
@@ -43,7 +46,7 @@ impl Texture {
             sample_count: 1,
             // 2d dimension
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            format,
             // Sampled allows use in bind group, copy dst allows texture to be destintation in queue::write_texture
             usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::COPY_DST,
         });

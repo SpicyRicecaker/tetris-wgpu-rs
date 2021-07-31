@@ -38,14 +38,26 @@ impl Player {
         let window_height = state.size().height;
         let window_width = state.size().width;
 
-        let l = self.thiccness as f32 / (window_width as f32 / 2.0);
+        // let l = self.thiccness as f32 / (window_width as f32 / 2.0);
+        let l = 0.1;
 
         let gl_y = (y as f32 - window_height as f32 / 2.0) / (window_height as f32 / 2.0);
         let gl_x = (x as f32 - window_width as f32 / 2.0) / (window_width as f32 / 2.0);
 
+        state.font_interface.queue(state.size);
+
+        // let gl_x = x as f32 / window_width as f32;
+        // let gl_y = y as f32 / window_height as f32;
+
+        // let gl_x = 1600 as f32 / 1880 as f32;
+        // let gl_y = 2600 as f32 / 2880 as f32;
+
+        // let gl_x = 1.0;
+        // let gl_y = 1.0;
         // let vertices_player: &[Vertex] = &[
         //     // Top right
         //     Vertex {
+        //         // 0.1
         //         position: [0.1, 0.1, 0.0],
         //         tex_coords: [0.4, 0.00759614],
         //     }, 
@@ -65,6 +77,7 @@ impl Player {
         //         tex_coords: [0.85967, 0.847329],
         //     },
         // ];
+
         // convert (x, y) -> (-1, 1) (-1, 1)
         let vertices_player: &[Vertex] = &[
             // Top right
@@ -82,12 +95,13 @@ impl Player {
                 position: [gl_x-l, gl_y-l, 0.0],
                 tex_coords: [0.28, 0.949],
             }, 
-            // bot right
-            Vertex {
-                position: [gl_x+l, gl_y-l, 0.0],
-                tex_coords: [0.85967, 0.847329],
-            },
+            // // bot right
+            // Vertex {
+            //     position: [gl_x+l, gl_y-l, 0.0],
+            //     tex_coords: [0.85967, 0.847329],
+            // },
         ];
+
 
         state.update_buffer(vertices_player);
     }
@@ -95,8 +109,8 @@ impl Player {
 
 impl Default for Player {
     fn default() -> Self {
-        let location = Coord::new(400, 300);
-        let thiccness = 5;
+        let location = Coord::new(810, 1440);
+        let thiccness = 50;
         let velocity = 10;
         Player {
             location,

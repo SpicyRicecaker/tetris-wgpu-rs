@@ -2,7 +2,10 @@ use super::State;
 use crate::World;
 impl State {
     pub fn input(&mut self, event: &winit::event::WindowEvent, world: &mut World) -> bool {
-        world.controller.process_events(event)
+        let mut bool = false;
+        bool = bool || world.controller.process_events(event);
+        bool = bool || self.camera_controller.process_events(event);
+        bool
         // self.camera_controller.process_events(event)
     }
 
@@ -25,41 +28,51 @@ impl State {
             });
 
         {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Render Pass"),
-                color_attachments: &[wgpu::RenderPassColorAttachment {
-                    view: &frame.view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
-                        store: true,
-                    },
-                }],
-                depth_stencil_attachment: None,
-            });
+            {
+                let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: Some("Render Pass"),
+                    color_attachments: &[wgpu::RenderPassColorAttachment {
+                        view: &frame.view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(wgpu::Color {
+                                r: 0.1,
+                                g: 0.2,
+                                b: 0.3,
+                                a: 1.0,
+                            }),
+                            store: true,
+                        },
+                    }],
+                    depth_stencil_attachment: None,
+                });
 
-            render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
-            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
-            // Index is 1 since it's the second
-            render_pass.set_bind_group(1, &self.uniform_bind_group, &[]);
-            // slot = what buffer slot to use for buffer (can have mult buffers)
-            // 2nd = slice of buffer to use
-            render_pass
-                .set_vertex_buffer(0, self.vertex_buffers[self.selected_buffer_idx].slice(..));
-            
-            render_pass.draw(0..self.num_vertices[self.selected_buffer_idx], 0..1)
+                render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
+                render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+                // Index is 1 since it's the second
+                render_pass.set_bind_group(1, &self.uniform_bind_group, &[]);
+                // slot = what buffer slot to use for buffer (can have mult buffers)
+                // 2nd = slice of buffer to use
+                render_pass
+                    .set_vertex_buffer(0, self.vertex_buffers[self.selected_buffer_idx].slice(..));
+
+                render_pass.draw(0..self.num_vertices[self.selected_buffer_idx], 0..1);
+            }
+
+            // draw any fonts
+            // let t = &mut encoder;
+            // let t = (&self.device, &mut encoder, self.size, &frame);
+            self.font_interface
+                .draw(&self.device, &mut encoder, self.size, &frame);
+            self.font_interface.finish();
+
             // render_pass.set_index_buffer(
             //     // self.index_buffers[self.selected_buffer_idx].slice(..),
             //     wgpu::IndexFormat::Uint16,
             // );
             // render_pass.draw_indexed(0..self.num_indices[self.selected_buffer_idx], 0, 0..1);
         }
-        self.queue.submit(std::iter::once(encoder.finish()));
+        self.queue.submit(Some(encoder.finish()));
         Ok(())
     }
 
