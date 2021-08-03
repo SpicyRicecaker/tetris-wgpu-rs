@@ -9,7 +9,7 @@ impl State {
         // self.camera_controller.process_events(event)
     }
 
-    pub fn update(&mut self, world: &mut World) {
+    pub fn update(&mut self) {
         self.camera_controller.update_camera(&mut self.camera);
         self.uniforms.update_view_proj(&self.camera);
         self.queue.write_buffer(
@@ -17,7 +17,6 @@ impl State {
             0,
             bytemuck::cast_slice(&[self.uniforms]),
         );
-        world.player.render(self);
     }
     pub fn render(&mut self) -> Result<(), wgpu::SwapChainError> {
         let frame = self.swap_chain.get_current_frame()?.output;
@@ -47,30 +46,26 @@ impl State {
                     depth_stencil_attachment: None,
                 });
 
-                render_pass.set_pipeline(&self.render_pipelines[self.selected_rd_pipeline_idx]);
-                render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+                render_pass.set_pipeline(&self.render_pipeline);
+                // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
                 // Index is 1 since it's the second
                 render_pass.set_bind_group(1, &self.uniform_bind_group, &[]);
                 // slot = what buffer slot to use for buffer (can have mult buffers)
                 // 2nd = slice of buffer to use
-                render_pass
-                    .set_vertex_buffer(0, self.vertex_buffers[self.selected_buffer_idx].slice(..));
+                render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
-                render_pass.draw(0..self.num_vertices[self.selected_buffer_idx], 0..1);
+                // render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
+                // render_pass
+                //     .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+
+                // UPDATED!
+                // render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
+                render_pass.draw(0..self.num_vertices, 0..1);
             }
 
-            // draw any fonts
-            // let t = &mut encoder;
-            // let t = (&self.device, &mut encoder, self.size, &frame);
             self.font_interface
                 .draw(&self.device, &mut encoder, self.size, &frame);
             self.font_interface.finish();
-
-            // render_pass.set_index_buffer(
-            //     // self.index_buffers[self.selected_buffer_idx].slice(..),
-            //     wgpu::IndexFormat::Uint16,
-            // );
-            // render_pass.draw_indexed(0..self.num_indices[self.selected_buffer_idx], 0, 0..1);
         }
         self.queue.submit(Some(encoder.finish()));
         Ok(())

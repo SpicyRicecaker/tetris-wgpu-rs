@@ -10,6 +10,8 @@ mod texture;
 
 mod challenges;
 
+use crate::wgpu_boilerplate::buffers::VERTICES_PENTAGON;
+
 use super::buffers;
 use super::camera::camera_controller::CameraController;
 use super::camera::Camera;
@@ -97,13 +99,16 @@ pub struct State {
     sc_desc: wgpu::SwapChainDescriptor,
     swap_chain: wgpu::SwapChain,
     pub size: winit::dpi::PhysicalSize<u32>,
-    render_pipelines: Vec<wgpu::RenderPipeline>,
-    selected_rd_pipeline_idx: usize,
+    render_pipeline: wgpu::RenderPipeline,
 
-    pub vertex_buffers: [wgpu::Buffer; 2],
+    instances: Vec<buffers::Instance>,
+    instance_buffer: wgpu::Buffer,
+
+    pub vertex_buffer: wgpu::Buffer,
     // index_buffers: [wgpu::Buffer; 2],
-    selected_buffer_idx: usize,
-    num_vertices: [u32; 2],
+    num_vertices: u32,
+    pub index_buffer: wgpu::Buffer,
+    num_indices: u32,
     // num_indices: [u32; 2],
     pub font_interface: FontInterface,
 
@@ -114,8 +119,8 @@ pub struct State {
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
 
-    diffuse_bind_group: wgpu::BindGroup,
-    diffuse_texture: texture::Texture,
+    // diffuse_bind_group: wgpu::BindGroup,
+    // diffuse_texture: texture::Texture,
 }
 
 impl State {
@@ -192,7 +197,7 @@ impl State {
 
         let camera_controller: CameraController = CameraController::new(0.2);
 
-        let mut uniforms = Uniforms::new();
+        let mut uniforms = Uniforms::new(sc_desc.width as f32, sc_desc.height as f32);
         uniforms.update_view_proj(&camera);
 
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -239,61 +244,32 @@ impl State {
             &uniform_bind_group_layout,
         );
 
-        let render_pipeline_1 =
+        let render_pipeline =
             Self::create_render_pipeline(&render_pipeline_layout, &sc_desc, &device, &shader);
-
-        let render_pipeline_2 =
-            Self::create_render_pipeline_2(&render_pipeline_layout, &sc_desc, &device, &shader);
-
-        let render_pipelines = vec![render_pipeline_1, render_pipeline_2];
-
-        let selected_rd_pipeline_idx = 0;
-
-        let vertex_buffer_pentagon = Self::create_buffer(
-            &device,
-            Some("Pentagon Vertex Buffer"),
-            bytemuck::cast_slice(buffers::VERTICES_PENTAGON),
-            wgpu::BufferUsage::VERTEX,
-        );
-        // let index_buffer_pentagon = Self::create_buffer(
-        //     &device,
-        //     Some("Pentagon Index Buffer"),
-        //     bytemuck::cast_slice(buffers::INDICES_PENTAGON),
-        //     wgpu::BufferUsage::INDEX,
-        // );
-
-        let vertex_buffer_hexagon = Self::create_buffer(
-            &device,
-            Some("Hexagon Vertex Buffer"),
-            bytemuck::cast_slice(buffers::VERTICES_HEXAGON),
-            wgpu::BufferUsage::VERTEX,
-        );
-        // let index_buffer_hexagon = Self::create_buffer(
-        //     &device,
-        //     Some("Hexagon Index Buffer"),
-        //     bytemuck::cast_slice(buffers::INDICES_HEXAGON),
-        //     wgpu::BufferUsage::INDEX,
-        // );
-
-        // let num_indices_pentagon = buffers::INDICES_PENTAGON.len() as u32;
-        // let num_indices_hexagon = buffers::INDICES_HEXAGON.len() as u32;
-
-        let num_vertices_pentagon = buffers::VERTICES_PENTAGON.len() as u32;
-        let num_vertices_hexagon = buffers::VERTICES_HEXAGON.len() as u32;
-
-        let num_vertices = [num_vertices_pentagon, num_vertices_hexagon];
-
-        let vertex_buffers = [vertex_buffer_pentagon, vertex_buffer_hexagon];
-        // let index_buffers = [index_buffer_pentagon, index_buffer_hexagon];
-
-        let selected_buffer_idx = 0;
 
         let font_interface = FontInterface::new(&device, format);
 
-        // let mut image_path = std::env::current_dir().unwrap();
-        // image_path.push("assets");
-        // image_path.push("memories.png");
-        // let path_as_str = image_path.to_str().unwrap();
+        let vertices = VERTICES_PENTAGON;
+
+        let vertex_buffer = Self::create_buffer(
+            &device,
+            Some("Vertex Buffer"),
+            bytemuck::cast_slice(vertices),
+            wgpu::BufferUsage::VERTEX,
+        );
+        let num_vertices = VERTICES_PENTAGON.len() as u32;
+
+        let instance = buffers::Instance {
+            position: cgmath::vec3(0.0, 0.0, 0.0),
+        };
+        let instances = vec![instance];
+        let instances_data = instances.iter().map(|i|i.to_raw()).collect::<Vec<_>>();
+        let instance_buffer = Self::create_buffer(&device, Some("instance buffer"), bytemuck::cast_slice(&instances_data), wgpu::BufferUsage::VERTEX);
+
+        let indices: &[u16] = &[];
+        let index_buffer = Self::create_buffer(&device, Some("index buffer"), bytemuck::cast_slice(indices), wgpu::BufferUsage::INDEX);
+
+        let num_indices = 0;
 
         Self {
             surface,
@@ -307,14 +283,15 @@ impl State {
             uniforms,
             uniform_buffer,
             uniform_bind_group,
-            render_pipelines,
-            selected_rd_pipeline_idx,
-            vertex_buffers,
+            render_pipeline,
+            vertex_buffer,
             num_vertices,
-            selected_buffer_idx,
-            // num_indices,
-            diffuse_bind_group,
-            diffuse_texture,
+            index_buffer,
+            num_indices,
+            instances, 
+            instance_buffer,
+            // diffuse_bind_group,
+            // diffuse_texture,
             font_interface,
         }
     }

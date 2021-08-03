@@ -6,7 +6,7 @@ pub struct Color {
 }
 
 impl Color {
-    fn new(r: u32, g: u32, b: u32, a: u32) -> Self {
+    pub fn new(r: u32, g: u32, b: u32, a: u32) -> Self {
         Color {
             r,
             g, 

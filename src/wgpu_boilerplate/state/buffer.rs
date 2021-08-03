@@ -17,17 +17,30 @@ impl State {
             usage,
         })
     }
-    pub fn update_buffer(
+    pub fn update_vertex_buffer(
         &mut self,
         slice: &[Vertex]
     ) {
-        let new_buffer = Self::create_buffer(
+        let vertex_buffer = Self::create_buffer(
             &self.device,
-            Some("Player vertex buffer"),
+            Some("vertex buffer"),
             bytemuck::cast_slice(slice),
             wgpu::BufferUsage::VERTEX,
         );
-        self.vertex_buffers[0] = new_buffer;
-        self.num_vertices[0] = slice.len() as u32;
+        self.vertex_buffer = vertex_buffer;
+        self.num_vertices = slice.len() as u32;
+    }
+    pub fn update_index_buffer(
+        &mut self,
+        slice: &[u16]
+    ) {
+        let index_buffer = Self::create_buffer(
+            &self.device,
+            Some("index buffer"),
+            bytemuck::cast_slice(slice),
+            wgpu::BufferUsage::INDEX,
+        );
+        self.index_buffer = index_buffer;
+        self.num_indices = slice.len() as u32;
     }
 }

@@ -85,11 +85,11 @@ impl Vertex {
                     // [f32; 3]
                     format: wgpu::VertexFormat::Float32x3,
                 },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x2,
-                },
+                // wgpu::VertexAttribute {
+                //     offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
+                //     shader_location: 1,
+                //     format: wgpu::VertexFormat::Float32x2,
+                // },
             ],
         }
     }
@@ -98,42 +98,87 @@ impl Vertex {
 #[repr(C)]
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Uniforms {
-    view_proj: [[f32; 4]; 4],
+    view: [[f32; 4]; 4],
+    model: [[f32; 4]; 4]
 }
 
 impl Uniforms {
-    pub fn new() -> Self {
+    pub fn new(x: f32, y: f32) -> Self {
         Self {
             // view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
-            view_proj: cgmath::Matrix4::identity().into()
+            view: cgmath::Matrix4::identity().into(),
+            // model: cgmath::Matrix4::ortho(0.0, , bottom, top, near, far)
+            model: cgmath::ortho(0.0, x, 0.0, y, -1.0, 1.0).into()
         }
     }
     pub fn update_view_proj(&mut self, camera: &Camera) {
-        self.view_proj = camera.build_view_projection_matrix().into();
+        self.view = camera.build_view_projection_matrix().into();
     }
 }
 
 impl Default for Uniforms {
+    /// Probably should not call this
     fn default() -> Self {
-        Self::new()
+        Self {
+            // view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
+            view: cgmath::Matrix4::identity().into(),
+            // model: cgmath::Matrix4::ortho(0.0, , bottom, top, near, far)
+            model: cgmath::ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0).into()
+        }
     }
 }
 
 pub struct Instance {
-    position: cgmath::Vector3<f32>,
-    rotation: cgmath::Quaternion<f32>,
+    pub position: cgmath::Vector3<f32>,
 }
 
+// NEW!
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-struct InstanceRaw {
+pub struct InstanceRaw {
     model: [[f32; 4]; 4],
 }
 
+impl InstanceRaw {
+    pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        use std::mem;
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<InstanceRaw>() as wgpu::BufferAddress,
+            step_mode: wgpu::InputStepMode::Instance,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: 0,
+                    shader_location: 5,
+                },
+
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 6,
+                },
+
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 7,
+                },
+
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    shader_location: 8,
+                }
+            ],
+        }
+    }
+}
+
+// NEW!
 impl Instance {
-    fn to_raw(&self) -> InstanceRaw {
+    pub fn to_raw(&self) -> InstanceRaw {
         InstanceRaw {
-            model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
+            model: (cgmath::Matrix4::from_translation(self.position)).into(),
         }
     }
 }

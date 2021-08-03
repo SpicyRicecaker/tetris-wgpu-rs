@@ -1,16 +1,14 @@
+// #![allow(dead_code)]
+
 use std::ops::Range;
 
 use event::{ElementState, VirtualKeyCode, WindowEvent};
 use rand::Rng;
-use wgpu::Color;
-use wgpu_boilerplate::{
-    buffers::Vertex,
-    state::{self, State},
-};
+use wgpu_boilerplate::state::{self, State};
 use winit::event;
 
-pub mod wgpu_boilerplate;
 pub mod graphics;
+pub mod wgpu_boilerplate;
 
 pub const MARGIN: f32 = 100.0;
 pub const WORLD_WIDTH: f32 = 1920.0 - MARGIN;
@@ -66,48 +64,41 @@ impl Player {
     fn tick(&mut self) {
         // If key pressed move
     }
-    pub fn render(&self, state: &mut State) {
+    pub fn render(&self, gfx: &mut graphics::Graphics) {
+        gfx.draw_square(
+            self.location.x,
+            self.location.y,
+            self.width,
+            graphics::color::Color::new(256, 256, 256, 256),
+        )
         // Draw a square at this pos
 
-        let x = self.location.x;
-        let y = self.location.y;
-
-        let window_height = state.size().height;
-        let window_width = state.size().width;
-
-        // let l = self.thiccness as f32 / (window_width as f32 / 2.0);
-        let l = 0.1;
-
-        let gl_y = (y as f32 - window_height as f32 / 2.0) / (window_height as f32 / 2.0);
-        let gl_x = (x as f32 - window_width as f32 / 2.0) / (window_width as f32 / 2.0);
-
-        state.font_interface.queue(
-            state.size,
-            &format!("Pos: ({}, {})", gl_x, gl_y),
-            x as f32,
-            (window_height as f32 - y) as f32,
-            Color {
-                r: 0.0,
-                g: 0.0,
-                b: 0.0,
-                a: 1.0,
-            },
-            40.0,
-        );
-        state.font_interface.queue(
-            state.size,
-            &format!("Zoom: ({})", state.camera.eye.z),
-            x as f32,
-            (window_height as f32 - y - 50.0) as f32,
-            Color {
-                r: 0.0,
-                g: 0.0,
-                b: 0.0,
-                a: 1.0,
-            },
-            40.0,
-        );
-
+        // state.font_interface.queue(
+        //     state.size,
+        //     &format!("Pos: ({}, {})", gl_x, gl_y),
+        //     x as f32,
+        //     (window_height as f32 - y) as f32,
+        //     Color {
+        //         r: 0.0,
+        //         g: 0.0,
+        //         b: 0.0,
+        //         a: 1.0,
+        //     },
+        //     40.0,
+        // );
+        // state.font_interface.queue(
+        //     state.size,
+        //     &format!("Zoom: ({})", state.camera.eye.z),
+        //     x as f32,
+        //     (window_height as f32 - y - 50.0) as f32,
+        //     Color {
+        //         r: 0.0,
+        //         g: 0.0,
+        //         b: 0.0,
+        //         a: 1.0,
+        //     },
+        //     40.0,
+        // );
     }
 }
 
@@ -206,8 +197,8 @@ impl World {
             self.player.location.x += self.player.velocity;
         }
     }
-    pub fn render(&self, state: &mut state::State) {
-        state.render().unwrap();
+    pub fn render(&self, gfx: &mut graphics::Graphics) {
+        self.player.render(gfx);
     }
 }
 
