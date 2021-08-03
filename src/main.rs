@@ -2,31 +2,31 @@ use futures::executor::block_on;
 use wgpu_boilerplate::state::State;
 use wgpu_test::wgpu_boilerplate;
 use wgpu_test::World;
+use wgpu_test::MARGIN;
 
-use winit::dpi::LogicalSize;
-use winit::dpi::Size;
+use winit::dpi::PhysicalPosition;
 use winit::window::WindowBuilder;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
 };
 
-
 fn main() {
     // Create event loop
     let event_loop = EventLoop::new();
     // Create window
     let builder = WindowBuilder::new()
-        .with_min_inner_size(Size::Logical(LogicalSize {
-            width: 1920_f64,
-            height: 1080_f64,
-        }))
-        .with_inner_size(Size::Logical(LogicalSize {
-            width: 1920_f64,
-            height: 1080_f64,
-        }))
+        .with_title("Tetris")
         .with_visible(false);
     let window = builder.build(&event_loop).unwrap();
+    let mut size = window.current_monitor().unwrap().size();
+    size.width -= MARGIN * 2;
+    size.height -= MARGIN * 2;
+    window.set_inner_size(size);
+    window.set_outer_position(PhysicalPosition {
+        x: MARGIN,
+        y: MARGIN,
+    });
 
     // Create some mobs
     let mut world = World::default();
@@ -35,7 +35,6 @@ fn main() {
     let mut state = block_on(wgpu_boilerplate::state::State::new(&window));
 
     // Create stuff
-    
 
     state.render_background(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
 

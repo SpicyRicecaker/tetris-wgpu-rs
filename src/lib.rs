@@ -1,4 +1,7 @@
+use std::ops::Range;
+
 use event::{ElementState, VirtualKeyCode, WindowEvent};
+use rand::Rng;
 use wgpu::Color;
 use wgpu_boilerplate::{
     buffers::Vertex,
@@ -7,32 +10,56 @@ use wgpu_boilerplate::{
 use winit::event;
 
 pub mod wgpu_boilerplate;
+pub mod graphics;
+
+pub const MARGIN: f32 = 100.0;
+pub const WORLD_WIDTH: f32 = 1920.0 - MARGIN;
+pub const WORLD_HEIGHT: f32 = 1080.0 - MARGIN;
 
 #[derive(Debug)]
 pub struct Coord {
-    x: u32,
-    y: u32,
+    x: f32,
+    y: f32,
 }
 
 impl Coord {
-    fn new(x: u32, y: u32) -> Self {
+    fn new(x: f32, y: f32) -> Self {
         Coord { x, y }
+    }
+    fn rand(x_range: Range<f32>, y_range: Range<f32>) -> Self {
+        let mut rng = rand::thread_rng();
+        Coord {
+            x: rng.gen_range(x_range),
+            y: rng.gen_range(y_range),
+        }
     }
 }
 
-// struct Bullet {
-//     pub location: Coord,
-//     velocity: f32,
-//     dx: f32,
-//     dy: f32,
-//     thiccness: u32,
-// }
+pub struct Enemy {
+    pub location: Coord,
+    width: f32,
+}
 
-
+impl Enemy {
+    pub fn new(location: Coord) -> Self {
+        Enemy {
+            location,
+            ..Default::default()
+        }
+    }
+}
+impl Default for Enemy {
+    fn default() -> Self {
+        Enemy {
+            location: Coord { x: 0.0, y: 0.0 },
+            width: 5.0,
+        }
+    }
+}
 pub struct Player {
     pub location: Coord,
-    velocity: u32,
-    thiccness: u32,
+    velocity: f32,
+    width: f32,
 }
 
 impl Player {
@@ -58,7 +85,7 @@ impl Player {
             state.size,
             &format!("Pos: ({}, {})", gl_x, gl_y),
             x as f32,
-            (window_height - y) as f32,
+            (window_height as f32 - y) as f32,
             Color {
                 r: 0.0,
                 g: 0.0,
@@ -71,7 +98,7 @@ impl Player {
             state.size,
             &format!("Zoom: ({})", state.camera.eye.z),
             x as f32,
-            (window_height - y - 50) as f32,
+            (window_height as f32 - y - 50.0) as f32,
             Color {
                 r: 0.0,
                 g: 0.0,
@@ -81,74 +108,17 @@ impl Player {
             40.0,
         );
 
-        // let gl_x = x as f32 / window_width as f32;
-        // let gl_y = y as f32 / window_height as f32;
-
-        // let gl_x = 1600 as f32 / 1880 as f32;
-        // let gl_y = 2600 as f32 / 2880 as f32;
-
-        // let gl_x = 1.0;
-        // let gl_y = 1.0;
-        // let vertices_player: &[Vertex] = &[
-        //     // Top right
-        //     Vertex {
-        //         // 0.1
-        //         position: [0.1, 0.1, 0.0],
-        //         tex_coords: [0.4, 0.00759614],
-        //     },
-        //     // Top left
-        //     Vertex {
-        //         position: [-0.1, 0.1, 0.0],
-        //         tex_coords: [0.0048, 0.43041354],
-        //     },
-        //     // bot left
-        //     Vertex {
-        //         position: [-0.1, -0.1, 0.0],
-        //         tex_coords: [0.28, 0.949],
-        //     },
-        //     // bot right
-        //     Vertex {
-        //         position: [0.1, -0.1, 0.0],
-        //         tex_coords: [0.85967, 0.847329],
-        //     },
-        // ];
-
-        // convert (x, y) -> (-1, 1) (-1, 1)
-        let vertices_player: &[Vertex] = &[
-            // Top right
-            Vertex {
-                position: [gl_x + l, gl_y + l, 0.0],
-                tex_coords: [0.4, 0.00759614],
-            },
-            // Top left
-            Vertex {
-                position: [gl_x - l, gl_y + l, 0.0],
-                tex_coords: [0.0048, 0.43041354],
-            },
-            // bot left
-            Vertex {
-                position: [gl_x - l, gl_y - l, 0.0],
-                tex_coords: [0.28, 0.949],
-            },
-            // // bot right
-            // Vertex {
-            //     position: [gl_x+l, gl_y-l, 0.0],
-            //     tex_coords: [0.85967, 0.847329],
-            // },
-        ];
-
-        state.update_buffer(vertices_player);
     }
 }
 
 impl Default for Player {
     fn default() -> Self {
-        let location = Coord::new(810, 1440);
-        let thiccness = 50;
-        let velocity = 10;
+        let location = Coord::new(0.0, 0.0);
+        let width = 50.0;
+        let velocity = 10.0;
         Player {
             location,
-            thiccness,
+            width,
             velocity,
         }
     }
@@ -215,7 +185,10 @@ struct Config {
 }
 pub struct World {
     pub player: Player,
+    pub enemies: Vec<Enemy>,
     pub controller: Controller,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl World {
@@ -240,9 +213,27 @@ impl World {
 
 impl Default for World {
     fn default() -> Self {
+        let x_range = 0.0..WORLD_WIDTH;
+        let y_range = 0.0..WORLD_HEIGHT;
         World {
             player: Player::default(),
             controller: Controller::default(),
+            enemies: vec![
+                Enemy {
+                    location: Coord::rand(x_range.clone(), y_range.clone()),
+                    ..Enemy::default()
+                },
+                Enemy {
+                    location: Coord::rand(x_range.clone(), y_range.clone()),
+                    ..Enemy::default()
+                },
+                Enemy {
+                    location: Coord::rand(x_range, y_range),
+                    ..Enemy::default()
+                },
+            ],
+            width: WORLD_WIDTH,
+            height: WORLD_HEIGHT,
         }
     }
 }
