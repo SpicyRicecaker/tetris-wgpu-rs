@@ -118,7 +118,6 @@ pub struct State {
     uniforms: Uniforms,
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
-
     // diffuse_bind_group: wgpu::BindGroup,
     // diffuse_texture: texture::Texture,
 }
@@ -140,58 +139,58 @@ impl State {
 
         let swap_chain = Self::create_swap_chain(&sc_desc, &surface, &device);
 
-        let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
-        let diffuse_texture =
-            texture::Texture::from_bytes(&device, &queue, format, diffuse_bytes, "memories.png")
-                .unwrap();
+        // let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
+        // let diffuse_texture =
+        //     texture::Texture::from_bytes(&device, &queue, format, diffuse_bytes, "memories.png")
+        //         .unwrap();
 
         // bindgroup = resources, & how shader can access them
-        let texture_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[
-                    wgpu::BindGroupLayoutEntry {
-                        // binding index, matches shading index (e.g. layout(set = 0, binding = 1))
-                        binding: 0,
-                        // Only visible to fragment shader
-                        visibility: wgpu::ShaderStage::FRAGMENT,
-                        // ty = type of binding
-                        ty: wgpu::BindingType::Texture {
-                            // Sampling returns floats
-                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            view_dimension: wgpu::TextureViewDimension::D2,
-                            multisampled: false,
-                        },
-                        count: None,
-                    },
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 1,
-                        // Only visible to fragment shader
-                        visibility: wgpu::ShaderStage::FRAGMENT,
-                        ty: wgpu::BindingType::Sampler {
-                            filtering: true,
-                            comparison: false,
-                        },
-                        count: None,
-                    },
-                ],
-                label: Some("texture_bind_group_layout"),
-            });
+        // let texture_bind_group_layout =
+        //     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        //         entries: &[
+        //             wgpu::BindGroupLayoutEntry {
+        //                 // binding index, matches shading index (e.g. layout(set = 0, binding = 1))
+        //                 binding: 0,
+        //                 // Only visible to fragment shader
+        //                 visibility: wgpu::ShaderStage::FRAGMENT,
+        //                 // ty = type of binding
+        //                 ty: wgpu::BindingType::Texture {
+        //                     // Sampling returns floats
+        //                     sample_type: wgpu::TextureSampleType::Float { filterable: true },
+        //                     view_dimension: wgpu::TextureViewDimension::D2,
+        //                     multisampled: false,
+        //                 },
+        //                 count: None,
+        //             },
+        //             wgpu::BindGroupLayoutEntry {
+        //                 binding: 1,
+        //                 // Only visible to fragment shader
+        //                 visibility: wgpu::ShaderStage::FRAGMENT,
+        //                 ty: wgpu::BindingType::Sampler {
+        //                     filtering: true,
+        //                     comparison: false,
+        //                 },
+        //                 count: None,
+        //             },
+        //         ],
+        //         label: Some("texture_bind_group_layout"),
+        //     });
 
         // Bind group is a more specific bind group layout, which allows for hotswapping (so long as bind group layouts are shared)
-        let diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &texture_bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
-                },
-            ],
-            label: Some("diffuse_bind_group"),
-        });
+        // let diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        //     layout: &texture_bind_group_layout,
+        //     entries: &[
+        //         wgpu::BindGroupEntry {
+        //             binding: 0,
+        //             resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+        //         },
+        //         wgpu::BindGroupEntry {
+        //             binding: 1,
+        //             resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+        //         },
+        //     ],
+        //     label: Some("diffuse_bind_group"),
+        // });
 
         let camera = Camera::new(sc_desc.width as f32, sc_desc.height as f32);
 
@@ -223,7 +222,7 @@ impl State {
                     },
                     count: None,
                 }],
-                label: Some("uniform_bind_group_layout"),
+                label: Some("Uniform Bind Group Layout"),
             });
 
         // create uniform bind group
@@ -233,14 +232,14 @@ impl State {
                 binding: 0,
                 resource: uniform_buffer.as_entire_binding(),
             }],
-            label: Some("uniform_bind_group"),
+            label: Some("Uniform Bind Group"),
         });
 
         let shader = Self::create_shader(&device);
 
         let render_pipeline_layout = Self::create_render_pipeline_layout(
             &device,
-            &texture_bind_group_layout,
+            // &texture_bind_group_layout,
             &uniform_bind_group_layout,
         );
 
@@ -263,11 +262,21 @@ impl State {
             position: cgmath::vec3(0.0, 0.0, 0.0),
         };
         let instances = vec![instance];
-        let instances_data = instances.iter().map(|i|i.to_raw()).collect::<Vec<_>>();
-        let instance_buffer = Self::create_buffer(&device, Some("instance buffer"), bytemuck::cast_slice(&instances_data), wgpu::BufferUsage::VERTEX);
+        let instances_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        let instance_buffer = Self::create_buffer(
+            &device,
+            Some("instance buffer"),
+            bytemuck::cast_slice(&instances_data),
+            wgpu::BufferUsage::VERTEX,
+        );
 
         let indices: &[u16] = &[];
-        let index_buffer = Self::create_buffer(&device, Some("index buffer"), bytemuck::cast_slice(indices), wgpu::BufferUsage::INDEX);
+        let index_buffer = Self::create_buffer(
+            &device,
+            Some("index buffer"),
+            bytemuck::cast_slice(indices),
+            wgpu::BufferUsage::INDEX,
+        );
 
         let num_indices = 0;
 
@@ -288,7 +297,7 @@ impl State {
             num_vertices,
             index_buffer,
             num_indices,
-            instances, 
+            instances,
             instance_buffer,
             // diffuse_bind_group,
             // diffuse_texture,

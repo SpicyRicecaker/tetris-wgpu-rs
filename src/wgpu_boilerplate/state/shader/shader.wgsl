@@ -15,7 +15,7 @@ struct Uniforms {
 };
 // inside the render_pipeline_layout, the idx corresponsinds to idx in group
 // group(0) would be the texture_binding
-[[group(1), binding(0)]]
+[[group(0), binding(0)]]
 var<uniform> uniforms: Uniforms;
 
 // Vertex output stores the inputs and outputs of our vertex shader
