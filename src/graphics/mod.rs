@@ -44,4 +44,7 @@ impl Graphics {
 
         self.state.buffer_queue.push_back(shape)
     }
+    pub fn clear_background(&mut self, color: color::Color) {
+        self.state.background.clear(color.into());
+    }
 }

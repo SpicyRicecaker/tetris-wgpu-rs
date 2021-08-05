@@ -8,10 +8,11 @@ mod shader;
 mod surface;
 mod swap_chain;
 mod texture;
+mod clear_background;
 
 use std::collections::VecDeque;
 
-use crate::wgpu_boilerplate::buffers::{INDICES_PENTAGON, VERTICES_PENTAGON};
+use crate::wgpu_boilerplate::{buffers::{INDICES_PENTAGON, VERTICES_PENTAGON}, state::clear_background::Background};
 
 use super::buffers;
 use super::camera::camera_controller::CameraController;
@@ -120,8 +121,8 @@ pub struct State {
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
 
+    pub background: clear_background::Background,
     pub buffer_queue: VecDeque<buffer_queue::Shape>, // diffuse_bind_group: wgpu::BindGroup,
-                                                     // diffuse_texture: texture::Texture
 }
 
 impl State {
@@ -140,59 +141,6 @@ impl State {
         let sc_desc = Self::create_swap_chain_descriptor(&size, format);
 
         let swap_chain = Self::create_swap_chain(&sc_desc, &surface, &device);
-
-        // let diffuse_bytes = include_bytes!("..\\..\\..\\assets\\memories.png");
-        // let diffuse_texture =
-        //     texture::Texture::from_bytes(&device, &queue, format, diffuse_bytes, "memories.png")
-        //         .unwrap();
-
-        // bindgroup = resources, & how shader can access them
-        // let texture_bind_group_layout =
-        //     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        //         entries: &[
-        //             wgpu::BindGroupLayoutEntry {
-        //                 // binding index, matches shading index (e.g. layout(set = 0, binding = 1))
-        //                 binding: 0,
-        //                 // Only visible to fragment shader
-        //                 visibility: wgpu::ShaderStage::FRAGMENT,
-        //                 // ty = type of binding
-        //                 ty: wgpu::BindingType::Texture {
-        //                     // Sampling returns floats
-        //                     sample_type: wgpu::TextureSampleType::Float { filterable: true },
-        //                     view_dimension: wgpu::TextureViewDimension::D2,
-        //                     multisampled: false,
-        //                 },
-        //                 count: None,
-        //             },
-        //             wgpu::BindGroupLayoutEntry {
-        //                 binding: 1,
-        //                 // Only visible to fragment shader
-        //                 visibility: wgpu::ShaderStage::FRAGMENT,
-        //                 ty: wgpu::BindingType::Sampler {
-        //                     filtering: true,
-        //                     comparison: false,
-        //                 },
-        //                 count: None,
-        //             },
-        //         ],
-        //         label: Some("texture_bind_group_layout"),
-        //     });
-
-        // Bind group is a more specific bind group layout, which allows for hotswapping (so long as bind group layouts are shared)
-        // let diffuse_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        //     layout: &texture_bind_group_layout,
-        //     entries: &[
-        //         wgpu::BindGroupEntry {
-        //             binding: 0,
-        //             resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
-        //         },
-        //         wgpu::BindGroupEntry {
-        //             binding: 1,
-        //             resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
-        //         },
-        //     ],
-        //     label: Some("diffuse_bind_group"),
-        // });
 
         let camera = Camera::new(sc_desc.width as f32, sc_desc.height as f32);
 
@@ -283,6 +231,8 @@ impl State {
         let num_indices = INDICES_PENTAGON.len() as u32;
 
         let buffer_queue = VecDeque::new();
+
+        let background = Background::default();
         Self {
             surface,
             device,
@@ -306,6 +256,7 @@ impl State {
             // diffuse_texture,
             font_interface,
             buffer_queue,
+            background 
         }
     }
 }

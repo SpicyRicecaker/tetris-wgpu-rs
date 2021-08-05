@@ -52,7 +52,7 @@ impl Enemy {
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
-            graphics::color::Color::new(256, 256, 256, 256),
+            graphics::color::Color::from_rgb(256, 256, 256, 256),
         );
     }
 }
@@ -80,7 +80,7 @@ impl Player {
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
-            graphics::color::Color::new(256, 256, 256, 256),
+            graphics::color::Color::from_rgb(256, 256, 256, 256),
         );
         // Draw a square at this pos
 

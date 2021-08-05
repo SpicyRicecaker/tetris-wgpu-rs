@@ -47,70 +47,74 @@ impl State {
                 });
 
                 while let Some(shape) = self.buffer_queue.pop_front() {
-                    // Create staging buffer for vertex
-                    // slot = what buffer slot to use for buffer (can have mult buffers)
-                    // 2nd = slice of buffer to use
-                    {
-                        let vertex_buffer = Self::create_buffer(
-                            &self.device,
-                            None,
-                            bytemuck::cast_slice(shape.vertices.as_slice()),
-                            wgpu::BufferUsage::COPY_SRC,
-                        );
-                        self.num_vertices = shape.vertices.len() as u32;
-                        // Copy stuff over
-                        encoder.copy_buffer_to_buffer(
-                            &vertex_buffer,
-                            0,
-                            &self.vertex_buffer,
-                            0,
-                            std::mem::size_of::<Vertex>() as u64
-                                * self.num_vertices as wgpu::BufferAddress, // std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress
-                        );
-                    }
-                    {
-                        let index_buffer = Self::create_buffer(
-                            &self.device,
-                            None,
-                            bytemuck::cast_slice(shape.indices.as_slice()),
-                            wgpu::BufferUsage::COPY_SRC,
-                        );
-                        self.num_indices = shape.indices.len() as u32;
-                        // Copy stuff over
-                        encoder.copy_buffer_to_buffer(
-                            &index_buffer,
-                            0,
-                            &self.index_buffer,
-                            0,
-                            std::mem::size_of::<u16>() as u64
-                                * self.num_indices as wgpu::BufferAddress, // std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress
-                        );
-                    }
+                            // Create staging buffer for vertex
+                            // slot = what buffer slot to use for buffer (can have mult buffers)
+                            // 2nd = slice of buffer to use
+                            {
+                                let vertex_buffer = Self::create_buffer(
+                                    &self.device,
+                                    None,
+                                    bytemuck::cast_slice(shape.vertices.as_slice()),
+                                    wgpu::BufferUsage::COPY_SRC,
+                                );
+                                self.num_vertices = shape.vertices.len() as u32;
+                                // Copy stuff over
+                                encoder.copy_buffer_to_buffer(
+                                    &vertex_buffer,
+                                    0,
+                                    &self.vertex_buffer,
+                                    0,
+                                    std::mem::size_of::<Vertex>() as u64
+                                        * self.num_vertices as wgpu::BufferAddress, // std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress
+                                );
+                            }
+                            {
+                                let index_buffer = Self::create_buffer(
+                                    &self.device,
+                                    None,
+                                    bytemuck::cast_slice(shape.indices.as_slice()),
+                                    wgpu::BufferUsage::COPY_SRC,
+                                );
+                                self.num_indices = shape.indices.len() as u32;
+                                // Copy stuff over
+                                encoder.copy_buffer_to_buffer(
+                                    &index_buffer,
+                                    0,
+                                    &self.index_buffer,
+                                    0,
+                                    std::mem::size_of::<u16>() as u64
+                                        * self.num_indices as wgpu::BufferAddress, // std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress
+                                );
+                            }
 
-                    let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                        label: Some("Render Pass"),
-                        color_attachments: &[wgpu::RenderPassColorAttachment {
-                            view: &frame.view,
-                            resolve_target: None,
-                            ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Load,
-                                store: true,
-                            },
-                        }],
-                        depth_stencil_attachment: None,
-                    });
+                            let mut render_pass =
+                                encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                                    label: Some("Render Pass"),
+                                    color_attachments: &[wgpu::RenderPassColorAttachment {
+                                        view: &frame.view,
+                                        resolve_target: None,
+                                        ops: wgpu::Operations {
+                                            load: wgpu::LoadOp::Load,
+                                            store: true,
+                                        },
+                                    }],
+                                    depth_stencil_attachment: None,
+                                });
 
-                    render_pass.set_pipeline(&self.render_pipeline);
-                    // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
-                    // Index is 1 since it's the second
-                    render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
+                            render_pass.set_pipeline(&self.render_pipeline);
+                            // render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+                            // Index is 1 since it's the second
+                            render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
 
-                    render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-                    render_pass
-                        .set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                    render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+                            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+                            render_pass.set_index_buffer(
+                                self.index_buffer.slice(..),
+                                wgpu::IndexFormat::Uint16,
+                            );
+                            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
                 }
             }
+
 
             self.font_interface
                 .draw(&self.device, &mut encoder, self.size, &frame);
