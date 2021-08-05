@@ -73,12 +73,12 @@ fn main() {
             Event::MainEventsCleared => {
                 // After tick you redraw stuff?
                 // Only redraw if you need to? (ui)
-                // world.tick();
+                world.tick();
 
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
-                // world.render(&mut gfx);
+                world.render(&mut gfx);
 
                 gfx.state.update();
                 match gfx.state.render() {

@@ -18,27 +18,26 @@ impl Graphics {
 
         // convert (x, y) -> (-1, 1) (-1, 1)
         let vertices: &[Vertex] = &[
-            // Top left, 1
+            // Top left, 0
             Vertex {
                 position: [x, y, 0.0],
             },
-            // Top right, 2
+            // Top right, 1
             Vertex {
                 position: [x + width, y, 0.0],
             },
-            // Bot left, 3
+            // Bot left, 2
             Vertex {
                 position: [x, y + width, 0.0],
             },
-            // bot right, 4
+            // bot right, 3
             Vertex {
                 position: [x + width, y + width, 0.0],
             },
         ];
         let indices: &[u16] = &[
-            1, 2, 3, // Top triangle
-            2, 3, 4, // Bot triangle
-            0, // padding
+            0, 2, 3, // Top triangle
+            3, 1, 0, // Bot triangle
         ];
 
         self.state.update_vertex_buffer(vertices);

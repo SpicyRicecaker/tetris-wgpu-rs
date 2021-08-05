@@ -31,7 +31,7 @@ pub const VERTICES_PENTAGON: &[Vertex] = &[
     }, // E
 ];
 
-// pub const INDICES_PENTAGON: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
+pub const INDICES_PENTAGON: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4, /* padding */ 0];
 
 // ccw: top, bot left, bot right
 pub const VERTICES_HEXAGON: &[Vertex] = &[
@@ -99,16 +99,14 @@ impl Vertex {
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Uniforms {
     view: [[f32; 4]; 4],
-    model: [[f32; 4]; 4]
+    model: [[f32; 4]; 4],
 }
 
 impl Uniforms {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
-            // view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
             view: cgmath::Matrix4::identity().into(),
-            // model: cgmath::Matrix4::ortho(0.0, , bottom, top, near, far)
-            model: cgmath::ortho(0.0, x, 0.0, y, -1.0, 1.0).into()
+            model: cgmath::ortho(0.0, x, y, 0.0, -1.0, 1.0).into(),
         }
     }
     pub fn update_view_proj(&mut self, camera: &Camera) {
@@ -120,10 +118,8 @@ impl Default for Uniforms {
     /// Probably should not call this
     fn default() -> Self {
         Self {
-            // view_proj: glam::Mat4::IDENTITY.to_cols_array_2d(),
             view: cgmath::Matrix4::identity().into(),
-            // model: cgmath::Matrix4::ortho(0.0, , bottom, top, near, far)
-            model: cgmath::ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0).into()
+            model: cgmath::ortho(0.0, 800.0, 0.0, 600.0, -1.0, 1.0).into(),
         }
     }
 }
@@ -151,24 +147,21 @@ impl InstanceRaw {
                     offset: 0,
                     shader_location: 5,
                 },
-
                 wgpu::VertexAttribute {
                     format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
                     shader_location: 6,
                 },
-
                 wgpu::VertexAttribute {
                     format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
                     shader_location: 7,
                 },
-
                 wgpu::VertexAttribute {
                     format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
                     shader_location: 8,
-                }
+                },
             ],
         }
     }
@@ -180,5 +173,23 @@ impl Instance {
         InstanceRaw {
             model: (cgmath::Matrix4::from_translation(self.position)).into(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use cgmath::Vector4;
+
+    use super::Uniforms;
+    #[test]
+    fn make_sure_ortho_works() {
+        let uniforms = Uniforms::new(800.0, 600.0);
+        let model = cgmath::Matrix4::from(uniforms.model);
+
+        let src: Vector4<f32> = cgmath::vec4(200.0, 600.0, 0.0, 1.0);
+
+        let res = model * src;
+
+        assert_eq!(res, cgmath::vec4(-0.5, -1.0, 0.0, 1.0));
     }
 }

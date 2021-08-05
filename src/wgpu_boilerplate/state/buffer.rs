@@ -23,7 +23,7 @@ impl State {
     ) {
         let vertex_buffer = Self::create_buffer(
             &self.device,
-            Some("vertex buffer"),
+            Some("Vertex Buffer"),
             bytemuck::cast_slice(slice),
             wgpu::BufferUsage::VERTEX,
         );

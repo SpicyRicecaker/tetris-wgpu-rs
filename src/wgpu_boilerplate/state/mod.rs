@@ -10,7 +10,7 @@ mod texture;
 
 mod challenges;
 
-use crate::wgpu_boilerplate::buffers::VERTICES_PENTAGON;
+use crate::wgpu_boilerplate::buffers::{INDICES_PENTAGON, VERTICES_PENTAGON};
 
 use super::buffers;
 use super::camera::camera_controller::CameraController;
@@ -96,7 +96,7 @@ pub struct State {
     surface: wgpu::Surface,
     pub device: wgpu::Device,
     queue: wgpu::Queue,
-    sc_desc: wgpu::SwapChainDescriptor,
+    pub sc_desc: wgpu::SwapChainDescriptor,
     swap_chain: wgpu::SwapChain,
     pub size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
@@ -270,7 +270,7 @@ impl State {
             wgpu::BufferUsage::VERTEX,
         );
 
-        let indices: &[u16] = &[];
+        let indices: &[u16] = INDICES_PENTAGON;
         let index_buffer = Self::create_buffer(
             &device,
             Some("index buffer"),
@@ -278,7 +278,7 @@ impl State {
             wgpu::BufferUsage::INDEX,
         );
 
-        let num_indices = 0;
+        let num_indices = INDICES_PENTAGON.len() as u32;
 
         Self {
             surface,

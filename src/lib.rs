@@ -4,7 +4,6 @@ use std::ops::Range;
 
 use event::{ElementState, VirtualKeyCode, WindowEvent};
 use rand::Rng;
-use wgpu_boilerplate::state::{self, State};
 use winit::event;
 
 pub mod graphics;
@@ -67,44 +66,44 @@ impl Player {
     pub fn render(&self, gfx: &mut graphics::Graphics) {
         gfx.draw_square(
             self.location.x,
-            self.location.y,
+            gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
             graphics::color::Color::new(256, 256, 256, 256),
-        )
+        );
         // Draw a square at this pos
 
-        // state.font_interface.queue(
-        //     state.size,
-        //     &format!("Pos: ({}, {})", gl_x, gl_y),
-        //     x as f32,
-        //     (window_height as f32 - y) as f32,
-        //     Color {
-        //         r: 0.0,
-        //         g: 0.0,
-        //         b: 0.0,
-        //         a: 1.0,
-        //     },
-        //     40.0,
-        // );
-        // state.font_interface.queue(
-        //     state.size,
-        //     &format!("Zoom: ({})", state.camera.eye.z),
-        //     x as f32,
-        //     (window_height as f32 - y - 50.0) as f32,
-        //     Color {
-        //         r: 0.0,
-        //         g: 0.0,
-        //         b: 0.0,
-        //         a: 1.0,
-        //     },
-        //     40.0,
-        // );
+        gfx.state.font_interface.queue(
+            gfx.state.size,
+            &format!("Pos: ({}, {})", self.location.x, self.location.y),
+            self.location.x,
+            gfx.state.sc_desc.height as f32 - self.location.y,
+            wgpu::Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+            40.0,
+        );
+        gfx.state.font_interface.queue(
+            gfx.state.size,
+            &format!("Zoom: ({})", gfx.state.camera.eye.z),
+            self.location.x,
+            gfx.state.sc_desc.height as f32 - self.location.y + 40.0,
+            wgpu::Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+            40.0,
+        );
     }
 }
 
 impl Default for Player {
     fn default() -> Self {
-        let location = Coord::new(0.0, 0.0);
+        let location = Coord::new(500.0, 500.0);
         let width = 50.0;
         let velocity = 10.0;
         Player {
@@ -169,11 +168,6 @@ impl Controller {
     }
 }
 
-struct Config {
-    fps: u32,
-    w: u32,
-    h: u32,
-}
 pub struct World {
     pub player: Player,
     pub enemies: Vec<Enemy>,
