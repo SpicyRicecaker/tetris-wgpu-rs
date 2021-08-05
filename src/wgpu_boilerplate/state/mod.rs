@@ -1,5 +1,6 @@
 mod adapter;
 mod buffer;
+pub mod buffer_queue;
 mod device_queue;
 pub mod render;
 mod render_pipeline;
@@ -8,7 +9,7 @@ mod surface;
 mod swap_chain;
 mod texture;
 
-mod challenges;
+use std::collections::VecDeque;
 
 use crate::wgpu_boilerplate::buffers::{INDICES_PENTAGON, VERTICES_PENTAGON};
 
@@ -118,8 +119,9 @@ pub struct State {
     uniforms: Uniforms,
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
-    // diffuse_bind_group: wgpu::BindGroup,
-    // diffuse_texture: texture::Texture,
+
+    pub buffer_queue: VecDeque<buffer_queue::Shape>, // diffuse_bind_group: wgpu::BindGroup,
+                                                     // diffuse_texture: texture::Texture
 }
 
 impl State {
@@ -254,7 +256,7 @@ impl State {
             &device,
             Some("Vertex Buffer"),
             bytemuck::cast_slice(vertices),
-            wgpu::BufferUsage::VERTEX,
+            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
         );
         let num_vertices = VERTICES_PENTAGON.len() as u32;
 
@@ -267,7 +269,7 @@ impl State {
             &device,
             Some("instance buffer"),
             bytemuck::cast_slice(&instances_data),
-            wgpu::BufferUsage::VERTEX,
+            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
         );
 
         let indices: &[u16] = INDICES_PENTAGON;
@@ -275,11 +277,12 @@ impl State {
             &device,
             Some("index buffer"),
             bytemuck::cast_slice(indices),
-            wgpu::BufferUsage::INDEX,
+            wgpu::BufferUsage::INDEX | wgpu::BufferUsage::COPY_DST,
         );
 
         let num_indices = INDICES_PENTAGON.len() as u32;
 
+        let buffer_queue = VecDeque::new();
         Self {
             surface,
             device,
@@ -302,6 +305,7 @@ impl State {
             // diffuse_bind_group,
             // diffuse_texture,
             font_interface,
+            buffer_queue,
         }
     }
 }

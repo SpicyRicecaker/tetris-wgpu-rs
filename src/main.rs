@@ -37,7 +37,7 @@ fn main() {
     let mut gfx = Graphics::new(state);
 
     // Create stuff
-    gfx.state.render_background(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
+    // gfx.state.render_background(0_f64, 0_f64, 0_f64, 0_f64).unwrap();
 
     window.set_visible(true);
 

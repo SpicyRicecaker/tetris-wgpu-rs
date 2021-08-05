@@ -44,12 +44,23 @@ impl Enemy {
             ..Default::default()
         }
     }
+    pub fn tick(&mut self) {
+        todo!()
+    }
+    pub fn render(&self, gfx: &mut graphics::Graphics) {
+        gfx.draw_square(
+            self.location.x,
+            gfx.state.sc_desc.height as f32 - self.location.y,
+            self.width,
+            graphics::color::Color::new(256, 256, 256, 256),
+        );
+    }
 }
 impl Default for Enemy {
     fn default() -> Self {
         Enemy {
             location: Coord { x: 0.0, y: 0.0 },
-            width: 5.0,
+            width: 50.0,
         }
     }
 }
@@ -60,8 +71,9 @@ pub struct Player {
 }
 
 impl Player {
-    fn tick(&mut self) {
+    pub fn tick(&mut self) {
         // If key pressed move
+        todo!()
     }
     pub fn render(&self, gfx: &mut graphics::Graphics) {
         gfx.draw_square(
@@ -193,6 +205,7 @@ impl World {
     }
     pub fn render(&self, gfx: &mut graphics::Graphics) {
         self.player.render(gfx);
+        self.enemies.iter().for_each(|e| e.render(gfx));
     }
 }
 
