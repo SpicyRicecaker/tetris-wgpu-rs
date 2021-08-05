@@ -17,13 +17,10 @@ impl Color {
         let mut include_alpha = false;
         // Have to convert to upper, as well as ensure len
         match hex.len() {
-            6 => {}
+            6 => (),
             8 => include_alpha = true,
-            _ => {
-                return Err("Hex is not of proper length".into());
-            }
+            _ => return Err("Hex is not of proper length".into()),
         }
-
         let keys = [
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
         ];
@@ -32,7 +29,9 @@ impl Color {
             .enumerate()
             .map(|(i, c)| (c.to_owned(), i as u32))
             .collect();
+
         let upper = hex.to_uppercase();
+
         let mut iter = upper.chars();
 
         let mut next_two = || -> Result<u32, Box<dyn std::error::Error>> {

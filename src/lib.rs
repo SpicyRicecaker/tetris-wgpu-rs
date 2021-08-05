@@ -8,6 +8,7 @@ use winit::event;
 
 pub mod graphics;
 pub mod wgpu_boilerplate;
+pub mod game;
 
 pub const MARGIN: f32 = 100.0;
 pub const WORLD_WIDTH: f32 = 1920.0 - MARGIN;

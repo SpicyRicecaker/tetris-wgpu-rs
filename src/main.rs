@@ -3,6 +3,7 @@ use wgpu_test::wgpu_boilerplate;
 use wgpu_test::World;
 use wgpu_test::MARGIN;
 use wgpu_test::graphics::Graphics;
+use wgpu_test::game;
 
 use winit::dpi::PhysicalPosition;
 use winit::window::WindowBuilder;
@@ -78,6 +79,9 @@ fn main() {
                 window.request_redraw();
             }
             Event::RedrawRequested(_) => {
+                // First clear background
+                gfx.clear_background(game::palette::Palette);
+
                 world.render(&mut gfx);
 
                 gfx.state.update();
