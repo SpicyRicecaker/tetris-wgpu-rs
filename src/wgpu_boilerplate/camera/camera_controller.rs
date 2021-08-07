@@ -95,7 +95,6 @@ impl CameraController {
         // let right = forward_norm.cross(camera.up);
         let right = forward_norm.cross(camera.up);
         let up = Vector3::new(0.0, 1.0, 0.0);
-        // println!("{:#?}", forward_norm.cross(camera.up));
 
         // Redo radius calc in case the up/ down is pressed.
         let forward = camera.target - camera.eye;

@@ -100,8 +100,8 @@ pub struct State {
     pub size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
 
-    instances: Vec<buffers::Instance>,
-    instance_buffer: wgpu::Buffer,
+    // instances: Vec<buffers::Instance>,
+    // instance_buffer: wgpu::Buffer,
 
     pub vertex_buffer: wgpu::Buffer,
     pub index_buffer: wgpu::Buffer,
@@ -210,17 +210,17 @@ impl State {
             mapped_at_creation: false,
         });
 
-        let instance = buffers::Instance {
-            position: cgmath::vec3(0.0, 0.0, 0.0),
-        };
-        let instances = vec![instance];
-        let instances_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
-        let instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Instance Buffer"),
-            size: 2000,
-            usage: wgpu::BufferUsage::INDEX,
-            mapped_at_creation: true,
-        });
+        // let instance = buffers::Instance {
+        //     position: cgmath::vec3(0.0, 0.0, 0.0),
+        // };
+        // let instances = vec![instance];
+        // let instances_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
+        // let instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+        //     label: Some("Instance Buffer"),
+        //     size: 2000,
+        //     usage: wgpu::BufferUsage::INDEX,
+        //     mapped_at_creation: true,
+        // });
         let background = Background::default();
         Self {
             surface,
@@ -239,8 +239,8 @@ impl State {
             indices,
             vertex_buffer,
             index_buffer,
-            instances,
-            instance_buffer,
+            // instances,
+            // instance_buffer,
             // diffuse_bind_group,
             // diffuse_texture,
             font_interface,

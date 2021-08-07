@@ -1,10 +1,10 @@
 use futures::executor::block_on;
+use game::Game;
+use tetris_wgpu_rs::game;
+use tetris_wgpu_rs::graphics::Graphics;
 use tetris_wgpu_rs::wgpu_boilerplate;
 use tetris_wgpu_rs::World;
 use tetris_wgpu_rs::MARGIN;
-use tetris_wgpu_rs::graphics::Graphics;
-use tetris_wgpu_rs::game;
-use game::Game;
 
 use winit::dpi::PhysicalPosition;
 use winit::window::WindowBuilder;
@@ -54,7 +54,7 @@ fn main() {
             Event::WindowEvent { ref event, .. } => {
                 if !gfx.state.input(event, &mut world) {
                     match event {
-                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::CloseRequested => exit(control_flow),
                         WindowEvent::KeyboardInput {
                             input:
                                 KeyboardInput {
@@ -63,7 +63,7 @@ fn main() {
                                     ..
                                 },
                             ..
-                        } => *control_flow = ControlFlow::Exit,
+                        } => exit(control_flow),
                         WindowEvent::Resized(size) => gfx.state.resize(*size),
                         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                             // new_inner_size is &&mut so we have to dereference it twice
@@ -94,11 +94,15 @@ fn main() {
                     // The system is out of memory, we should probably quit
                     Err(wgpu::SwapChainError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                     // All other errors (Outdated, Timeout) should be resolved by the next frame
-                    Err(e) => eprintln!("{:?}", e),
+                    Err(e) => eprintln!("Err: {:?}", e),
                 };
                 // world.render(&mut state);
             }
             _ => (),
         }
     });
+}
+
+fn exit(control_flow: &mut ControlFlow) {
+    *control_flow = ControlFlow::Exit;
 }
