@@ -1,6 +1,6 @@
 pub struct Background {
-    color: wgpu::Color,
-    should_clear: bool,
+    pub color: wgpu::Color,
+    pub should_clear: bool,
 }
 
 impl Background {
@@ -16,7 +16,7 @@ impl Background {
 impl Default for Background {
     fn default() -> Self {
         Background {
-            color: wgpu::Color::BLACK,
+            color: wgpu::Color::TRANSPARENT,
             should_clear: false,
         }
     }

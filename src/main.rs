@@ -4,6 +4,7 @@ use wgpu_test::World;
 use wgpu_test::MARGIN;
 use wgpu_test::graphics::Graphics;
 use wgpu_test::game;
+use game::Game;
 
 use winit::dpi::PhysicalPosition;
 use winit::window::WindowBuilder;
@@ -32,6 +33,7 @@ fn main() {
 
     // Create some mobs
     let mut world = World::default();
+    let game = Game::default();
 
     // Init wgpu the whole reason we're playing the game lol
     let state = block_on(wgpu_boilerplate::state::State::new(&window));
@@ -80,9 +82,9 @@ fn main() {
             }
             Event::RedrawRequested(_) => {
                 // First clear background
-                gfx.clear_background(game::palette::Palette);
+                gfx.clear_background(game.palette.bg);
 
-                world.render(&mut gfx);
+                world.render(&mut gfx, &game);
 
                 gfx.state.update();
                 match gfx.state.render() {

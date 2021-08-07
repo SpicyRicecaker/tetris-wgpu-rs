@@ -15,7 +15,8 @@
             },
             "program": ".\\target\\debug\\wgpu_test.exe",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
         },
     ]
 }

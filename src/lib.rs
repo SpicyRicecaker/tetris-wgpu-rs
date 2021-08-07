@@ -6,9 +6,9 @@ use event::{ElementState, VirtualKeyCode, WindowEvent};
 use rand::Rng;
 use winit::event;
 
+pub mod game;
 pub mod graphics;
 pub mod wgpu_boilerplate;
-pub mod game;
 
 pub const MARGIN: f32 = 100.0;
 pub const WORLD_WIDTH: f32 = 1920.0 - MARGIN;
@@ -76,12 +76,12 @@ impl Player {
         // If key pressed move
         todo!()
     }
-    pub fn render(&self, gfx: &mut graphics::Graphics) {
+    pub fn render(&self, gfx: &mut graphics::Graphics, game: &crate::game::Game) {
         gfx.draw_square(
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
-            graphics::color::Color::from_rgb(256, 256, 256, 256),
+            game.palette.l
         );
         // Draw a square at this pos
 
@@ -90,12 +90,7 @@ impl Player {
             &format!("Pos: ({}, {})", self.location.x, self.location.y),
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y - 40.0,
-            wgpu::Color {
-                r: 0.1,
-                g: 0.2,
-                b: 0.3,
-                a: 1.0,
-            },
+            wgpu::Color::from(game.palette.fg),
             40.0,
         );
         gfx.state.font_interface.queue(
@@ -103,12 +98,7 @@ impl Player {
             &format!("Zoom: ({})", gfx.state.camera.eye.z),
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y - 80.0,
-            wgpu::Color {
-                r: 0.1,
-                g: 0.2,
-                b: 0.3,
-                a: 1.0,
-            },
+            wgpu::Color::from(game.palette.fg),
             40.0,
         );
     }
@@ -204,8 +194,8 @@ impl World {
             self.player.location.x += self.player.velocity;
         }
     }
-    pub fn render(&self, gfx: &mut graphics::Graphics) {
-        self.player.render(gfx);
+    pub fn render(&self, gfx: &mut graphics::Graphics, game: &game::Game) {
+        self.player.render(gfx, game);
         self.enemies.iter().for_each(|e| e.render(gfx));
     }
 }
