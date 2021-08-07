@@ -9,7 +9,7 @@ pub struct Vertex {
     // x, y, z of 3d spce
     pub position: [f32; 3],
     // rgb
-    // color: [f32; 3],
+    color: [f32; 4],
 }
 
 // ccw: top, bot left, bot right
