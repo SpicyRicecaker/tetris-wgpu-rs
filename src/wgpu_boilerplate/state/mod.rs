@@ -1,6 +1,6 @@
 mod adapter;
-mod buffer;
 pub mod buffer_queue;
+mod clear_background;
 mod device_queue;
 pub mod render;
 mod render_pipeline;
@@ -8,11 +8,8 @@ mod shader;
 mod surface;
 mod swap_chain;
 mod texture;
-mod clear_background;
 
-use std::collections::VecDeque;
-
-use crate::wgpu_boilerplate::{buffers::{INDICES_PENTAGON, VERTICES_PENTAGON}, state::clear_background::Background};
+use crate::wgpu_boilerplate::state::clear_background::Background;
 
 use super::buffers;
 use super::camera::camera_controller::CameraController;
@@ -20,7 +17,7 @@ use super::camera::Camera;
 use buffers::Uniforms;
 use wgpu::{
     util::{DeviceExt, StagingBelt},
-    Color, SwapChainTexture, TextureFormat,
+    BufferDescriptor, Color, SwapChainTexture, TextureFormat,
 };
 
 use wgpu_glyph::{ab_glyph, GlyphBrush, GlyphBrushBuilder, Section, Text};
@@ -107,11 +104,11 @@ pub struct State {
     instance_buffer: wgpu::Buffer,
 
     pub vertex_buffer: wgpu::Buffer,
-    // index_buffers: [wgpu::Buffer; 2],
-    num_vertices: u32,
     pub index_buffer: wgpu::Buffer,
-    num_indices: u32,
-    // num_indices: [u32; 2],
+
+    pub vertices: Vec<super::buffers::Vertex>,
+    pub indices: Vec<u16>,
+
     pub font_interface: FontInterface,
 
     pub camera: Camera,
@@ -122,7 +119,6 @@ pub struct State {
     uniform_bind_group: wgpu::BindGroup,
 
     pub background: clear_background::Background,
-    pub buffer_queue: VecDeque<buffer_queue::Shape>, // diffuse_bind_group: wgpu::BindGroup,
 }
 
 impl State {
@@ -197,40 +193,34 @@ impl State {
 
         let font_interface = FontInterface::new(&device, sc_desc.format);
 
-        let vertices = VERTICES_PENTAGON;
+        let vertices = Vec::new();
+        let indices = Vec::new();
 
-        let vertex_buffer = Self::create_buffer(
-            &device,
-            Some("Vertex Buffer"),
-            bytemuck::cast_slice(vertices),
-            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
-        );
-        let num_vertices = VERTICES_PENTAGON.len() as u32;
+        let vertex_buffer = device.create_buffer(&BufferDescriptor {
+            label: Some("Vertex Buffer"),
+            size: 0,
+            usage: wgpu::BufferUsage::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let index_buffer = device.create_buffer(&BufferDescriptor {
+            label: Some("Index Buffer"),
+            size: 0,
+            usage: wgpu::BufferUsage::COPY_DST,
+            mapped_at_creation: false,
+        });
 
         let instance = buffers::Instance {
             position: cgmath::vec3(0.0, 0.0, 0.0),
         };
         let instances = vec![instance];
         let instances_data = instances.iter().map(|i| i.to_raw()).collect::<Vec<_>>();
-        let instance_buffer = Self::create_buffer(
-            &device,
-            Some("instance buffer"),
-            bytemuck::cast_slice(&instances_data),
-            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
-        );
-
-        let indices: &[u16] = INDICES_PENTAGON;
-        let index_buffer = Self::create_buffer(
-            &device,
-            Some("index buffer"),
-            bytemuck::cast_slice(indices),
-            wgpu::BufferUsage::INDEX | wgpu::BufferUsage::COPY_DST,
-        );
-
-        let num_indices = INDICES_PENTAGON.len() as u32;
-
-        let buffer_queue = VecDeque::new();
-
+        let instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Instance Buffer"),
+            size: 2000,
+            usage: wgpu::BufferUsage::INDEX,
+            mapped_at_creation: true,
+        });
         let background = Background::default();
         Self {
             surface,
@@ -245,17 +235,16 @@ impl State {
             uniform_buffer,
             uniform_bind_group,
             render_pipeline,
+            vertices,
+            indices,
             vertex_buffer,
-            num_vertices,
             index_buffer,
-            num_indices,
             instances,
             instance_buffer,
             // diffuse_bind_group,
             // diffuse_texture,
             font_interface,
-            buffer_queue,
-            background 
+            background,
         }
     }
 }

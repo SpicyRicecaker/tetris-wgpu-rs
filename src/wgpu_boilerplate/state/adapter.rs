@@ -4,7 +4,7 @@ impl State{
         // Create the adapter
         instance
             .request_adapter(&wgpu::RequestAdapterOptionsBase {
-                power_preference: wgpu::PowerPreference::default(),
+                power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(surface),
             })
             .await

@@ -1954,6 +1954,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "tetris-wgpu-rs"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cgmath",
+ "env_logger",
+ "futures",
+ "image",
+ "log",
+ "rand 0.8.4",
+ "wgpu",
+ "wgpu_glyph",
+ "winit",
+]
+
+[[package]]
 name = "thiserror"
 version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2287,23 +2304,6 @@ dependencies = [
  "glyph_brush",
  "log",
  "wgpu",
-]
-
-[[package]]
-name = "wgpu_test"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "cgmath",
- "env_logger",
- "futures",
- "image",
- "log",
- "rand 0.8.4",
- "wgpu",
- "wgpu_glyph",
- "winit",
 ]
 
 [[package]]

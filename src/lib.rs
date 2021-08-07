@@ -48,12 +48,12 @@ impl Enemy {
     pub fn tick(&mut self) {
         todo!()
     }
-    pub fn render(&self, gfx: &mut graphics::Graphics) {
+    pub fn render(&self, gfx: &mut graphics::Graphics, game: &crate::game::Game) {
         gfx.draw_square(
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
-            graphics::color::Color::from_rgb(256, 256, 256, 256),
+            game.palette.l,
         );
     }
 }
@@ -81,7 +81,7 @@ impl Player {
             self.location.x,
             gfx.state.sc_desc.height as f32 - self.location.y,
             self.width,
-            game.palette.l
+            game.palette.l,
         );
         // Draw a square at this pos
 
@@ -196,7 +196,7 @@ impl World {
     }
     pub fn render(&self, gfx: &mut graphics::Graphics, game: &game::Game) {
         self.player.render(gfx, game);
-        self.enemies.iter().for_each(|e| e.render(gfx));
+        self.enemies.iter().for_each(|e| e.render(gfx, game));
     }
 }
 
@@ -208,6 +208,10 @@ impl Default for World {
             player: Player::default(),
             controller: Controller::default(),
             enemies: vec![
+                Enemy {
+                    location: Coord { x: 100.0, y: 100.0 },
+                    ..Enemy::default()
+                },
                 Enemy {
                     location: Coord::rand(x_range.clone(), y_range.clone()),
                     ..Enemy::default()

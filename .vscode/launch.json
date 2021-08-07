@@ -5,17 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
             "request": "launch",
-            "name": "Debug binary 'wgpu_test'",
             "cargo": {
                 "args": [
                     "build",
                 ],
             },
-            "program": ".\\target\\debug\\wgpu_test.exe",
+            "program": "${workspaceRoot}/target/debug/tetris-wgpu-rs.exe",
             "args": [],
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
+            "environment": [],
             "console": "internalConsole"
         },
     ]

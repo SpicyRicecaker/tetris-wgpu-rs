@@ -1,9 +1,9 @@
 use futures::executor::block_on;
-use wgpu_test::wgpu_boilerplate;
-use wgpu_test::World;
-use wgpu_test::MARGIN;
-use wgpu_test::graphics::Graphics;
-use wgpu_test::game;
+use tetris_wgpu_rs::wgpu_boilerplate;
+use tetris_wgpu_rs::World;
+use tetris_wgpu_rs::MARGIN;
+use tetris_wgpu_rs::graphics::Graphics;
+use tetris_wgpu_rs::game;
 use game::Game;
 
 use winit::dpi::PhysicalPosition;

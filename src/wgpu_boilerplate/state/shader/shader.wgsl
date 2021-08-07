@@ -48,9 +48,10 @@ fn main (
 
     // // view is for camera
     // // model converts screen coords from 0-[max screensize] (e.g., (400, 599)) to normalized coords from 0-1 (e.g., (0.5122123, 0.99231))
-    // out.clip_position = uniforms.view * uniforms.model * vec4<f32>(model.position, 1.0);
+    out.clip_position = uniforms.view * uniforms.model * vec4<f32>(model.position, 1.0);
     // out.clip_position = uniforms.model * vec4<f32>(model.position, 1.0);
-    out.clip_position = uniforms.model * vec4<f32>(model.position, 1.0);
+    out.color = model.color;
+    // out.clip_position = uniforms.model * vec4<f32>(model.position, 1.0);
 
     return out;
 }
