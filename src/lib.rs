@@ -108,7 +108,7 @@ impl Default for Player {
     fn default() -> Self {
         let location = Coord::new(500.0, 500.0);
         let width = 50.0;
-        let velocity = 10.0;
+        let velocity = 5.0;
         Player {
             location,
             width,

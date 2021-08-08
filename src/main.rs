@@ -1,7 +1,6 @@
 use futures::executor::block_on;
 use game::Game;
 use tetris_wgpu_rs::game;
-use tetris_wgpu_rs::graphics::color;
 use tetris_wgpu_rs::graphics::Graphics;
 use tetris_wgpu_rs::wgpu_boilerplate;
 use tetris_wgpu_rs::World;
@@ -14,7 +13,7 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 fn main() {
     env_logger::init();

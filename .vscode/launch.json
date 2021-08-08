@@ -8,17 +8,13 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "cargo": {
-                "args": [
-                    "build",
-                ],
-            },
-            "program": "${workspaceRoot}/target/debug/tetris-wgpu-rs.exe",
+            "program": "${workspaceRoot}/target/debug/${workspaceRootFolderName}.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "internalConsole"
+            "console": "internalConsole",
+            "preLaunchTask": "rust: cargo build"
         },
     ]
 }

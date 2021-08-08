@@ -48,11 +48,13 @@ impl State {
 
                 {
                     // Not sure which one is better
-                    self.vertex_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                        label: None,
-                        contents: bytemuck::cast_slice(&self.vertices),
-                        usage: wgpu::BufferUsage::VERTEX,
-                    });
+                    self.vertex_buffer =
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: None,
+                                contents: bytemuck::cast_slice(&self.vertices),
+                                usage: wgpu::BufferUsage::VERTEX,
+                            });
                     // let vertex_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     //     label: None,
                     //     contents: bytemuck::cast_slice(&self.vertices),
@@ -70,11 +72,13 @@ impl State {
                 }
                 {
                     // Not sure which one is better
-                    self.index_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                        label: None,
-                        contents: bytemuck::cast_slice(&self.indices),
-                        usage: wgpu::BufferUsage::INDEX,
-                    });
+                    self.index_buffer =
+                        self.device
+                            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                                label: None,
+                                contents: bytemuck::cast_slice(&self.indices),
+                                usage: wgpu::BufferUsage::INDEX,
+                            });
                     // let index_buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                     //     label: None,
                     //     contents: bytemuck::cast_slice(&self.indices),
@@ -143,5 +147,9 @@ impl State {
         self.update_sc_size();
         // update swap chain based of new swap description
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
+        // Update other
+        self.camera.aspect_ratio = (size.width as f32 / size.height as f32) / 2.0;
+        // println!("{}x{}, AR: {}", self.size.width, self.size.height, self.size.width as f32 / self.size.height as f32);
+        // println!("CAMERA AR: {}", self.camera.aspect_ratio);
     }
 }
