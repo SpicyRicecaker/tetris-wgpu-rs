@@ -1,6 +1,7 @@
 use futures::executor::block_on;
 use game::Game;
 use tetris_wgpu_rs::game;
+use tetris_wgpu_rs::graphics::color;
 use tetris_wgpu_rs::graphics::Graphics;
 use tetris_wgpu_rs::wgpu_boilerplate;
 use tetris_wgpu_rs::World;
@@ -12,6 +13,8 @@ use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
 };
+
+use std::time::{Duration, Instant};
 
 fn main() {
     env_logger::init();
@@ -44,6 +47,18 @@ fn main() {
 
     window.set_visible(true);
 
+    // Game "speed" or "update time" should be 60
+    // But render time should happen regardless of ticks
+    let ticks_per_second: f64 = 144.0;
+    let nanos_per_tick: u128 = (1_000_000_000.0 / ticks_per_second).round() as u128;
+    let mut frames = 0;
+    let mut average_frames = 0;
+    let mut prev_time = Instant::now();
+    let mut timer = Instant::now();
+    let mut lag: u128 = 0;
+    let mut ticks = 0;
+    let mut average_ticks = 0;
+
     // Here's the 'game loop'
     event_loop.run(move |event, _, control_flow| {
         // ControlFlow Poll v. ControlFlow Wait, two different power v. performance cases
@@ -74,15 +89,49 @@ fn main() {
                 }
             }
             Event::MainEventsCleared => {
-                // After tick you redraw stuff?
-                // Only redraw if you need to? (ui)
-                world.tick();
+                let time_passed = prev_time.elapsed();
+                lag += time_passed.as_nanos();
+                prev_time = Instant::now();
 
+                // So long as time passed is above the designated nanos per fps
+                while lag > nanos_per_tick {
+                    world.tick();
+                    ticks += 1;
+                    lag -= nanos_per_tick;
+                }
+
+                // Unconditionally rerender
                 window.request_redraw();
+                frames += 1;
+
+                if timer.elapsed().as_millis() > 1000 {
+                    timer = Instant::now();
+                    average_frames = frames;
+                    average_ticks = ticks;
+                    frames = 0;
+                    ticks = 0;
+                }
             }
             Event::RedrawRequested(_) => {
                 // First clear background
                 gfx.clear_background(game.palette.bg);
+                // Write fps
+                gfx.state.font_interface.queue(
+                    gfx.state.size,
+                    &format!("FPS: {}", average_frames),
+                    0.0,
+                    0.0,
+                    wgpu::Color::from(game.palette.fg),
+                    20.0,
+                );
+                gfx.state.font_interface.queue(
+                    gfx.state.size,
+                    &format!("Ticks/s: {}", average_ticks),
+                    140.0,
+                    0.0,
+                    wgpu::Color::from(game.palette.fg),
+                    20.0,
+                );
 
                 world.render(&mut gfx, &game);
 
