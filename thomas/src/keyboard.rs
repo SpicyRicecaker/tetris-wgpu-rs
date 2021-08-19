@@ -12,6 +12,9 @@ pub struct Keyboard {
     pub a: bool,
     pub d: bool,
     pub r: bool,
+    pub z: bool,
+    pub c: bool,
+    pub space: bool,
 }
 
 impl Keyboard {
@@ -28,6 +31,9 @@ impl Keyboard {
             a: false,
             d: false,
             r: false,
+            z: false,
+            c: false,
+            space: false,
         }
     }
 
@@ -44,6 +50,9 @@ impl Keyboard {
             VirtualKeyCode::A => self.a,
             VirtualKeyCode::D => self.d,
             VirtualKeyCode::R => self.r,
+            VirtualKeyCode::Z => self.z,
+            VirtualKeyCode::C => self.c,
+            VirtualKeyCode::Space => self.space,
             _ => false,
         }
     }
@@ -103,6 +112,18 @@ impl Keyboard {
                     }
                     VirtualKeyCode::R => {
                         self.r = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::Z => {
+                        self.z = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::C => {
+                        self.c = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::Space => {
+                        self.space = is_pressed;
                         true
                     }
                     _ => false,
