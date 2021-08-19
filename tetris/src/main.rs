@@ -5,6 +5,7 @@ fn main() {
 
     let (event_loop, ctx) = thomas::Porter::build(thomas::Config {
         title: universe.config.title().to_string(),
+        ticks: *universe.config.ticks(),
         margin: 100.0,
     });
 
