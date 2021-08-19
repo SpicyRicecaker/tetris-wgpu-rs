@@ -17,7 +17,7 @@ pub use wgpu::Color;
 /// render frames depends on refresh rate, but we can control ticks per second
 pub struct Config {
     pub title: String,
-    // ticks: u32,
+    pub ticks: u32,
     pub margin: f32,
 }
 
@@ -58,6 +58,7 @@ impl Porter {
             graphics,
             keyboard,
             window,
+            config
         };
 
         (event_loop, context)
@@ -69,7 +70,7 @@ impl Porter {
     ) {
         // Game "speed" or "update time" should be 60
         // But render time should happen regardless of ticks
-        let ticks_per_second: f64 = 144.0;
+        let ticks_per_second: f64 = context.config.ticks as f64;
         let nanos_per_tick: u128 = (1_000_000_000.0 / ticks_per_second).round() as u128;
         let mut frames = 0;
         let mut average_frames = 0;
