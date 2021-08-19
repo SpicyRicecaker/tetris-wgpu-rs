@@ -48,6 +48,11 @@ impl Color {
 
         Ok(Color { r, g, b, a })
     }
+
+    pub fn fade(mut self, alpha: f32) -> Self {
+        self.a = (alpha * 256.0).floor() as u32;
+        self
+    }
 }
 
 #[inline]

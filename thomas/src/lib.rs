@@ -3,6 +3,7 @@ use context::Context;
 pub mod graphics;
 mod keyboard;
 pub use graphics::frontend;
+pub use winit;
 
 use winit::dpi::PhysicalPosition;
 use winit::{

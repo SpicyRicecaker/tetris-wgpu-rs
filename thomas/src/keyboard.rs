@@ -10,7 +10,8 @@ pub struct Keyboard {
     pub w: bool,
     pub s: bool,
     pub a: bool,
-    pub d: bool
+    pub d: bool,
+    pub r: bool,
 }
 
 impl Keyboard {
@@ -26,8 +27,27 @@ impl Keyboard {
             s: false,
             a: false,
             d: false,
+            r: false,
         }
     }
+
+    pub fn is_pressed(&mut self, key: VirtualKeyCode) -> bool {
+        match key {
+            VirtualKeyCode::Up => self.up,
+            VirtualKeyCode::Down => self.down,
+            VirtualKeyCode::Left => self.left,
+            VirtualKeyCode::Right => self.right,
+            VirtualKeyCode::Equals => self.plus,
+            VirtualKeyCode::Minus => self.minus,
+            VirtualKeyCode::W => self.w,
+            VirtualKeyCode::S => self.s,
+            VirtualKeyCode::A => self.a,
+            VirtualKeyCode::D => self.d,
+            VirtualKeyCode::R => self.r,
+            _ => false,
+        }
+    }
+
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::KeyboardInput {
@@ -79,6 +99,10 @@ impl Keyboard {
                     }
                     VirtualKeyCode::D => {
                         self.d = is_pressed;
+                        true
+                    }
+                    VirtualKeyCode::R => {
+                        self.r = is_pressed;
                         true
                     }
                     _ => false,

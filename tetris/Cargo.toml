@@ -1,10 +1,13 @@
 [package]
 name = "tetris"
 version = "0.1.0"
+authors = ["SpicyRicecaker <awesomenessisgolden@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/SpicyRicecaker/tetris-wgpu-rs"
+homepage = "https://github.com/SpicyRicecaker/tetris-wgpu-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 thomas = { path = "../thomas" }
-rand = "0.8.4"
+rand = "0.8.3"
