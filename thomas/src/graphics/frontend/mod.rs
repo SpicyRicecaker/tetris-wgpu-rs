@@ -1,10 +1,14 @@
-pub mod color;
 pub mod camera_controller;
+pub mod color;
+
+use std::f32::consts::PI;
+
 use super::backend::{buffers::Vertex, State};
+use color::Color;
 
 impl State {
     /// Takes in top left coordinate of square, width, and a `color::Color`
-    pub fn draw_square(&mut self, x: f32, y: f32, width: f32, color: color::Color) {
+    pub fn draw_square(&mut self, x: f32, y: f32, width: f32, color: Color) {
         let color = wgpu::Color::from(color);
         let color = [
             color.r as f32,
@@ -38,6 +42,99 @@ impl State {
                 color,
             },
         ];
+
+        let indices = &[
+            0, 2, 3, // Top triangle
+            3, 1, 0, // Bot triangle
+        ];
+
+        self.push_shape(vertices, indices);
+    }
+
+    pub fn draw_rectangle(&mut self, x: f32, y: f32, width: f32, height: f32, color: Color) {
+        let color = wgpu::Color::from(color);
+        let color = [
+            color.r as f32,
+            color.g as f32,
+            color.b as f32,
+            color.a as f32,
+        ];
+        // We're allowed to pass in coords straight from our game, since our view matrix
+        // will take care of transforming coords
+
+        // Z is always 0 for a 2d game
+        let vertices = &[
+            // Top left, 0
+            Vertex {
+                position: [x, y, 0.0],
+                color,
+            },
+            // Top right, 1
+            Vertex {
+                position: [x + width, y, 0.0],
+                color,
+            },
+            // Bot left, 2
+            Vertex {
+                position: [x, y + height, 0.0],
+                color,
+            },
+            // bot right, 3
+            Vertex {
+                position: [x + width, y + height, 0.0],
+                color,
+            },
+        ];
+
+        let indices = &[
+            0, 2, 3, // Top triangle
+            3, 1, 0, // Bot triangle
+        ];
+
+        self.push_shape(vertices, indices);
+    }
+
+    pub fn draw_line(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Color) {
+        let color = wgpu::Color::from(color);
+        let color = [
+            color.r as f32,
+            color.g as f32,
+            color.b as f32,
+            color.a as f32,
+        ];
+        // Get angle of line
+        let angle = ((y2 - y1) / (x2 - x1)).atan();
+        // Get perpendicular upper angle of line
+        let pangle = angle + PI / 2.0;
+        let r = thickness / 2.0;
+        // Get diffs
+        let pdx = pangle.cos() * r;
+        let pdy = pangle.sin() * r;
+
+        let vertices = &[
+            // Top left, 0
+            Vertex {
+                position: [x2 + pdx, y2 + pdy, 0.0],
+                color,
+            },
+            // Top right, 1
+            Vertex {
+                position: [x1 + pdx, y1 + pdy, 0.0],
+                color,
+            },
+            // bot right, 3
+            Vertex {
+                position: [x2 - pdx, y2 - pdy, 0.0],
+                color,
+            },
+            // Bot left, 2
+            Vertex {
+                position: [x1 - pdx, y1 - pdy, 0.0],
+                color,
+            },
+        ];
+
+        dbg!(&vertices);
 
         let indices = &[
             0, 2, 3, // Top triangle

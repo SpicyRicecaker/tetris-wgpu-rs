@@ -2,9 +2,9 @@ use tetris::game::Game;
 use tetris::World;
 
 use thomas::context::Context;
+use thomas::frontend::camera_controller::CameraController;
 use thomas::Config;
 use thomas::Porter;
-use thomas::frontend::camera_controller::CameraController;
 
 /// The idea is something like
 /// ```rust
@@ -33,13 +33,16 @@ fn main() {
     // Builtin, should probably put in docs or something
     let camera_controller = CameraController::new(0.2);
 
-
     let config = Config {
         title: String::from("Tetris"),
         margin: tetris::MARGIN,
     };
 
-    let state = State { world, game, camera_controller };
+    let state = State {
+        world,
+        game,
+        camera_controller,
+    };
 
     // Setup config, as well as load resources like textuers and sound in the future
     let (event_loop, ctx) = Porter::build(config);
@@ -50,13 +53,12 @@ fn main() {
 struct State {
     world: World,
     game: Game,
-    camera_controller: CameraController
+    camera_controller: CameraController,
 }
 
 impl thomas::TrainEngine for State {
     fn tick(&mut self, ctx: &mut Context) {
-        self.camera_controller
-            .tick(ctx);
+        self.camera_controller.tick(ctx);
 
         self.world.tick(ctx, &self.game);
     }
@@ -64,6 +66,9 @@ impl thomas::TrainEngine for State {
     // Mks includes winit stuff, like mouse events, gfx is purely for drawing
     // Probably don't need mks in render but we'll leave it in here for now
     fn render(&self, ctx: &mut Context) {
+        // First clear background
+        ctx.graphics.clear_background(self.game.palette.bg);
+
         self.world.render(ctx, &self.game);
     }
 }

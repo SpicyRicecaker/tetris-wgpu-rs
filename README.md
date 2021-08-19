@@ -1,19 +1,21 @@
-# TODO
+# Tetris
 
-Right now graphics -> context, and wgpu_boilerplate isn't actually just wgpu, it includes winit, which we need to handle keyboard/mouse events. Therefore, we need a struct like the following
+Built on top of wgpu with api inspiration from [ggez](https://github.com/ggez/ggez).
+
+Learned basic wgpu api from [learn-wgpu](https://sotrh.github.io/learn-wgpu/), projections from, [learnopengl](https://learnopengl.com/), batch rendering and engine design from [The Cherno](https://www.youtube.com/playlist?list=PLlrATfBNZ98f5vZ8nJ6UengEkZUMC4fy5)
+
+## Running
+
+Install nightly rust compiler
 
 ```rust
-struct Context {
-    Graphics {
-        (Drawing Methods),
-        Camera,
-        Backend
-    },
-    Keyboard,
-    Mouse,
-}
+rustup install nightly
 ```
 
-Which entails something like renaming `wgpu-boilerplate` -> `context`, and renaming `state` -> `graphics`, merging the two to have one struct with pub and private methods
+Clone repo & build run
 
-TL;DR `Graphics` should never hold `input` lol
+```bash
+git clone https://github.com/SpicyRicecaker/tetris-wgpu-rs/tree/master
+cd tetris-wgpu-rs
+cargo run --release
+```

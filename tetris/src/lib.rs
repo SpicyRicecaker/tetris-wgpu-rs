@@ -137,8 +137,8 @@ impl World {
         // self.enemies.iter_mut().for_each(|e| e.tick(ctx));
     }
     pub fn render(&self, ctx: &mut Context, game: &game::Game) {
-        // First clear background
-        ctx.graphics.clear_background(game.palette.bg);
+        // Create debug line
+        ctx.graphics.draw_line(0.0, 0.0, 500.0, 500.0, 50.0, game.palette.l);
         // Render player and all enemies
         self.enemies.iter().for_each(|e| e.render(ctx, game));
         self.player.render(ctx, game);
