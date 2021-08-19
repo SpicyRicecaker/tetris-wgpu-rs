@@ -86,7 +86,6 @@ mod test {
                 a: 256
             }
         );
-        dbg!(color);
     }
     #[test]
     fn test_color_to_wgpu_color() {
@@ -100,6 +99,5 @@ mod test {
                 a: 1.0
             }
         );
-        dbg!(color);
     }
 }

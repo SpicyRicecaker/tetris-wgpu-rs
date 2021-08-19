@@ -1,90 +1,17 @@
-pub mod buffers;
 mod bg;
-pub mod render;
+pub mod buffers;
+mod camera;
+mod font;
 mod pipeline;
+pub mod render;
 mod shader;
 mod texture;
-mod camera;
 
 use bg::Background;
 
-use camera::Camera;
 use buffers::Uniforms;
-use wgpu::{
-    util::{DeviceExt, StagingBelt},
-    BufferDescriptor, Color, TextureFormat,
-};
-
-// use wgpu_glyph::{ab_glyph, GlyphBrush, GlyphBrushBuilder, Section, Text};
-
-pub struct FontInterface {
-    staging_belt: StagingBelt,
-    // glyph_brush: GlyphBrush<()>,
-}
-
-impl FontInterface {
-    pub fn new(device: &wgpu::Device, format: TextureFormat) -> Self {
-        let staging_belt = wgpu::util::StagingBelt::new(1024);
-
-        // let visitor =
-        //     ab_glyph::FontArc::try_from_slice(include_bytes!("..\\..\\..\\assets\\visitor2.ttf"))
-        //         .unwrap();
-
-        // let glyph_brush = GlyphBrushBuilder::using_font(visitor).build(device, format);
-
-        Self {
-            staging_belt,
-            // glyph_brush,
-        }
-    }
-
-    pub fn finish(&mut self) {
-        self.staging_belt.finish()
-    }
-
-    pub fn queue(
-        &mut self,
-        size: winit::dpi::PhysicalSize<u32>,
-        text: &str,
-        x: f32,
-        y: f32,
-        color: Color,
-        scale: f32,
-    ) {
-        // self.glyph_brush.queue(Section {
-        //     screen_position: (x, y),
-        //     bounds: (size.width as f32, size.height as f32),
-        //     text: vec![Text::new(text)
-        //         .with_color([
-        //             color.r as f32,
-        //             color.g as f32,
-        //             color.b as f32,
-        //             color.a as f32,
-        //         ])
-        //         .with_scale(scale)],
-        //     ..Section::default()
-        // });
-    }
-
-    pub fn draw(
-        &mut self,
-        device: &wgpu::Device,
-        encoder: &mut wgpu::CommandEncoder,
-        size: winit::dpi::PhysicalSize<u32>,
-        // frame: &SwapChainTexture,
-    ) {
-        // self.glyph_brush
-        //     .draw_queued(
-        //         device,
-        //         &mut self.staging_belt,
-        //         encoder,
-        //         &frame.view,
-        //         size.width,
-        //         size.height,
-        //     )
-        //     .expect("Draw queued");
-    }
-}
+use camera::Camera;
+use wgpu::{util::DeviceExt, BufferDescriptor};
 
 pub struct State {
     surface: wgpu::Surface,
@@ -100,8 +27,6 @@ pub struct State {
     pub vertices: Vec<buffers::Vertex>,
     pub indices: Vec<u16>,
 
-    pub font_interface: FontInterface,
-
     pub camera: Camera,
 
     uniforms: Uniforms,
@@ -109,6 +34,8 @@ pub struct State {
     uniform_bind_group: wgpu::BindGroup,
 
     pub background: bg::Background,
+
+    pub font_interface: font::FontInterface,
 }
 
 impl State {
@@ -141,8 +68,8 @@ impl State {
             format: surface.get_preferred_format(&adapter).unwrap(),
             width: size.width,
             height: size.height,
-            // Low latency vsync, falls back to Fifo,
-            present_mode: wgpu::PresentMode::Mailbox,
+            // Low latency vsync is mailbox, falls back to Fifo,
+            present_mode: wgpu::PresentMode::Fifo,
         };
 
         surface.configure(&device, &config);
@@ -196,8 +123,6 @@ impl State {
         let render_pipeline =
             Self::create_render_pipeline(&render_pipeline_layout, &config, &device, &shader);
 
-        let font_interface = FontInterface::new(&device, config.format);
-
         let vertices = Vec::new();
         let indices = Vec::new();
 
@@ -216,6 +141,8 @@ impl State {
         });
 
         let background = Background::default();
+
+        let font_interface = font::FontInterface::new(&device, config.format);
         Self {
             surface,
             config,
@@ -231,8 +158,8 @@ impl State {
             indices,
             vertex_buffer,
             index_buffer,
-            font_interface,
             background,
+            font_interface,
         }
     }
 }

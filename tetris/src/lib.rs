@@ -1,5 +1,3 @@
-// #![allow(dead_code)]
-
 use rand::prelude::*;
 use std::ops::Range;
 use thomas::context::Context;
@@ -41,7 +39,7 @@ impl Enemy {
             ..Default::default()
         }
     }
-    pub fn tick(&mut self, ctx: &mut Context) {
+    pub fn tick(&mut self, _ctx: &mut Context) {
         self.location.y -= 1.0;
     }
     pub fn render(&self, ctx: &mut Context, game: &crate::game::Game) {
@@ -92,16 +90,14 @@ impl Player {
         );
         // Draw a square at this pos
 
-        ctx.graphics.font_interface.queue(
-            ctx.graphics.size,
+        ctx.graphics.draw_text(
             &format!("Pos: ({}, {})", self.location.x, self.location.y),
             self.location.x,
             ctx.graphics.size.height as f32 - self.location.y - 40.0,
             thomas::Color::from(game.palette.fg),
             40.0,
         );
-        ctx.graphics.font_interface.queue(
-            ctx.graphics.size,
+        ctx.graphics.draw_text(
             &format!("Zoom: ({})", ctx.graphics.camera.eye.z),
             self.location.x,
             ctx.graphics.size.height as f32 - self.location.y - 80.0,
@@ -132,13 +128,14 @@ pub struct World {
 }
 
 impl World {
-    pub fn tick(&mut self, ctx: &mut Context, game: &game::Game) {
+    pub fn tick(&mut self, ctx: &mut Context, _game: &game::Game) {
         self.player.tick(ctx);
         // self.enemies.iter_mut().for_each(|e| e.tick(ctx));
     }
     pub fn render(&self, ctx: &mut Context, game: &game::Game) {
         // Create debug line
-        ctx.graphics.draw_line(0.0, 0.0, 500.0, 500.0, 50.0, game.palette.l);
+        ctx.graphics
+            .draw_line(0.0, 0.0, 500.0, 500.0, 50.0, game.palette.l);
         // Render player and all enemies
         self.enemies.iter().for_each(|e| e.render(ctx, game));
         self.player.render(ctx, game);

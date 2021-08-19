@@ -2,10 +2,6 @@ use wgpu::util::DeviceExt;
 
 use super::State;
 impl State {
-    // pub fn input(&mut self, event: &winit::event::WindowEvent) -> bool {
-    //     self.camera_controller.process_events(event)
-    // }
-
     pub fn update(&mut self) {
         self.uniforms.update_view_proj(&self.camera);
         self.queue.write_buffer(
@@ -16,7 +12,9 @@ impl State {
     }
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let frame = self.surface.get_current_frame()?.output;
-        let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = frame
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -89,9 +87,9 @@ impl State {
                 self.vertices.clear();
             }
 
-            // self.font_interface
-            //     .draw(&self.device, &mut encoder, self.size, &frame);
-            // self.font_interface.finish();
+            self.font_interface
+                .draw(&self.device, &mut encoder, self.size, &view);
+            self.font_interface.finish();
         }
         self.queue.submit(Some(encoder.finish()));
         Ok(())

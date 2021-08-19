@@ -38,14 +38,18 @@ fn main() {
         margin: tetris::MARGIN,
     };
 
+    // Setup config, as well as load resources like textuers and sound in the future
+    let (event_loop, ctx) = Porter::build(config);
+
+    // Use context to load some fonts?
+    // let font = ctx.graphics.load_font("byte slice here");
+
     let state = State {
         world,
         game,
         camera_controller,
+        // font
     };
-
-    // Setup config, as well as load resources like textuers and sound in the future
-    let (event_loop, ctx) = Porter::build(config);
 
     Porter::run(event_loop, ctx, state);
 }
@@ -54,6 +58,7 @@ struct State {
     world: World,
     game: Game,
     camera_controller: CameraController,
+    // font: GlyphBrush<()>
 }
 
 impl thomas::TrainEngine for State {

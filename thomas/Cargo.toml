@@ -9,10 +9,10 @@ edition = "2018"
 winit = "0.25.0"
 wgpu = "0.10.1"
 futures = "0.3.16"
-bytemuck = { version="1.7.2", features=["derive"] }
+bytemuck = { version = "1.7.2", features = ["derive"] }
 image = "0.23.14"
 anyhow = "1.0.43"
 cgmath = "0.18.0"
-# wgpu_glyph = "0.13.0"
+wgpu_glyph = "0.14.1"
 log = "0.4.14"
 env_logger = "0.9.0"

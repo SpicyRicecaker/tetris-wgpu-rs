@@ -1,5 +1,6 @@
 pub mod camera_controller;
 pub mod color;
+pub mod font;
 
 use std::f32::consts::PI;
 
@@ -134,7 +135,6 @@ impl State {
             },
         ];
 
-        dbg!(&vertices);
 
         let indices = &[
             0, 2, 3, // Top triangle

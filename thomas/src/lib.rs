@@ -132,28 +132,23 @@ impl Porter {
                     }
                 }
                 Event::RedrawRequested(_) => {
-                    // Should move this to the game
-                    // First clear background
-                    // self.graphics.clear_background(game.palette.bg);
-                    // // Write fps
-                    // self.graphics.state.font_interface.queue(
-                    //     self.graphics.state.size,
-                    //     &format!("FPS: {}", average_frames),
-                    //     0.0,
-                    //     0.0,
-                    //     wgpu::Color::from(game.palette.fg),
-                    //     20.0,
-                    // );
-                    // self.graphics.state.font_interface.queue(
-                    //     self.graphics.state.size,
-                    //     &format!("Ticks/s: {}", average_ticks),
-                    //     140.0,
-                    //     0.0,
-                    //     wgpu::Color::from(game.palette.fg),
-                    //     20.0,
-                    // );
-
                     state.render(&mut context);
+
+                    // Write fps
+                    context.graphics.draw_text(
+                        &format!("FPS: {}", average_frames),
+                        0.0,
+                        0.0,
+                        wgpu::Color::GREEN,
+                        20.0,
+                    );
+                    context.graphics.draw_text(
+                        &format!("Ticks/s: {}", average_ticks),
+                        140.0,
+                        0.0,
+                        wgpu::Color::GREEN,
+                        20.0,
+                    );
 
                     context.graphics.update();
                     match context.graphics.render() {
