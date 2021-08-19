@@ -37,7 +37,7 @@ impl State {
                 // Target color output for swap chain, replace old pixels, and write to all colors
                 targets: &[wgpu::ColorTargetState {
                     format: sc_desc.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
+                    blend: Some(wgpu::BlendState::ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
                 }],
             }),
