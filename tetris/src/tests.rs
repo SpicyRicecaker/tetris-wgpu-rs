@@ -76,8 +76,11 @@ mod test {
     }
 
     mod spawn {
-        use crate::tetromino::{
-            coord::Coord, direction::Direction, tetromino_type::TetrominoType, Tetromino,
+        use crate::{
+            tetromino::{
+                coord::Coord, direction::Direction, tetromino_type::TetrominoType, Tetromino,
+            },
+            universe::Dimensions,
         };
 
         #[test]
@@ -116,7 +119,10 @@ mod test {
                 Coord::new(5, 10),
                 TetrominoType::T,
             );
-            // assert!(tetromino.within_boundary(Tetromino::get_dxdy(Direction::Down), D10, 20));
+            assert!(tetromino.within_boundary(
+                Tetromino::get_dxdy(Direction::Down),
+                &Dimensions { w: 10, h: 20 }
+            ));
         }
 
         #[test]
@@ -131,7 +137,10 @@ mod test {
                 Coord::new(5, 0),
                 TetrominoType::T,
             );
-            // assert!(tetromino.within_boundary(Tetromino::get_dxdy(Direction::Down), 10, 20));
+            assert!(tetromino.within_boundary(
+                Tetromino::get_dxdy(Direction::Down),
+                &Dimensions { w: 10, h: 20 }
+            ));
         }
     }
 }

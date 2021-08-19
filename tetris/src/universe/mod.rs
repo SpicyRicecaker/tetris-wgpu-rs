@@ -188,8 +188,8 @@ impl thomas::TrainEngine for Universe {
 }
 
 pub struct Dimensions {
-    w: u32,
-    h: u32,
+    pub w: u32,
+    pub h: u32,
 }
 
 impl Dimensions {

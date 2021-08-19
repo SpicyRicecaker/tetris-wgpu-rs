@@ -66,12 +66,6 @@ impl Default for ControlledKey {
 
 impl ControlledKey {
     pub fn tick(&mut self, ctx: &mut Context) -> bool {
-        if ctx.keyboard.is_pressed(self.key) {
-            // Reset buffer and move it right
-            self.open_buffer();
-            return true;
-        }
-
         // Read our current controlled key buffer
         if let Buffer::Opened(buffer) = self.buffer {
             match self.state {
@@ -111,6 +105,10 @@ impl ControlledKey {
                     return false;
                 }
             }
+        } else if ctx.keyboard.is_pressed(self.key) {
+            // Reset buffer and move it right
+            self.open_buffer();
+            return true;
         }
         false
     }
