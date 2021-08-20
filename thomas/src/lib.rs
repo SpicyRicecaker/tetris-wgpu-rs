@@ -42,7 +42,9 @@ pub mod graphics;
 mod keyboard;
 pub use graphics::frontend;
 use image::GenericImageView;
+use resource::ResourceManager;
 pub use winit;
+mod resource;
 
 use winit::dpi::PhysicalPosition;
 use winit::{
@@ -68,6 +70,7 @@ pub struct ContextBuilder {
     title: String,
     margin: f32,
     icon: Option<PathBuf>,
+    resource_mgr: PathBuf,
     config: Config,
 }
 
@@ -82,6 +85,7 @@ impl ContextBuilder {
             title: String::from("Game"),
             margin: 100.0,
             icon: None,
+            resource_mgr: PathBuf::new(),
             config: Config::default(),
         }
     }
@@ -103,6 +107,11 @@ impl ContextBuilder {
     /// Changes icon of window
     pub fn with_icon(mut self, path: PathBuf) -> Self {
         self.icon = Some(path);
+        self
+    }
+    /// Changes root path of resources
+    pub fn with_resource_dir(mut self, path: PathBuf) -> Self {
+        self.resource_mgr = path;
         self
     }
     /// Creates a [`Context`] and [`EventLoop<()>`] using current settings, consuming the builder
@@ -148,12 +157,15 @@ impl ContextBuilder {
         // After everything's loaded make window visible
         window.set_visible(true);
 
+        let resource_mgr = ResourceManager::new(self.resource_mgr);
+
         let context = Context {
             graphics,
             keyboard,
             window,
             // Doesn't matter if we move here 'cause self is consumed
             config: self.config,
+            resource_mgr
         };
 
         (event_loop, context)
