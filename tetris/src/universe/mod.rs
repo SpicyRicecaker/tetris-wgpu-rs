@@ -36,7 +36,7 @@ pub struct Universe {
     pub config: Config,
 }
 
-impl thomas::TrainEngine for Universe {
+impl thomas::Runnable for Universe {
     fn tick(&mut self, ctx: &mut Context) {
         if !self.game.running() {
             self.game_over(ctx);
