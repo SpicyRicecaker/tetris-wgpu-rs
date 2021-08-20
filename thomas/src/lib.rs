@@ -1,3 +1,9 @@
+//! This crate is a 2d framework. Internally, it's a wrapper over [`wgpu`] that takes great
+//! inspiration from `ggez` and `raylib`.
+//!
+//! Create a struct that implements the [`Runnable`] trait, a context using [`ContextBuilder`],
+//! Then start the game loop with [`main::run`]
+
 pub mod context;
 use context::Context;
 pub mod graphics;
@@ -16,30 +22,67 @@ use std::path::PathBuf;
 use std::time::Instant;
 pub use wgpu::Color;
 
-/// render frames depends on refresh rate, but we can control ticks per second
+/// Contains parameters that are used by [`main::run`]
 pub struct Config {
-    pub title: String,
     pub ticks: u32,
-    pub margin: f32,
-    pub icon: Option<PathBuf>,
+}
+impl Default for Config {
+    fn default() -> Self {
+        Self { ticks: 140 }
+    }
+}
+/// Builder for a [`Context`]
+pub struct ContextBuilder {
+    title: String,
+    margin: f32,
+    icon: Option<PathBuf>,
+    config: Config,
 }
 
-pub struct Porter;
-pub trait TrainEngine {
-    fn tick(&mut self, ctx: &mut context::Context);
-
-    // Mks includes winit stuff, like mouse events, gfx is purely for drawing
-    // Probably don't need mks in render but we'll leave it in here for now
-    fn render(&self, ctx: &mut context::Context);
-}
-impl Porter {
-    pub fn build(config: Config) -> (EventLoop<()>, context::Context) {
+impl ContextBuilder {
+    /// ## Defaults
+    /// `100.0` px margin
+    /// `Game` title
+    /// No icon
+    /// Default config
+    pub fn new() -> Self {
+        Self {
+            title: String::from("Game"),
+            margin: 100.0,
+            icon: None,
+            config: Config::default(),
+        }
+    }
+    /// Changes title of [`winit::window::Window`]
+    pub fn with_title(mut self, title: &str) -> Self {
+        self.title = title.to_string();
+        self
+    }
+    /// Changes ticks in [`Config`]
+    pub fn with_ticks(mut self, ticks: u32) -> Self {
+        self.config.ticks = ticks;
+        self
+    }
+    /// Changes margin of game window, functionally equivalent to html margin
+    pub fn with_margin(mut self, margin: f32) -> Self {
+        self.margin = margin;
+        self
+    }
+    /// Changes icon of window
+    pub fn with_icon(mut self, path: PathBuf) -> Self {
+        self.icon = Some(path);
+        self
+    }
+    /// Creates a [`Context`] and [`EventLoop<()>`] using current settings, consuming the builder
+    pub fn build(self) -> (EventLoop<()>, context::Context) {
+        // Init logger for errors, etc.
         env_logger::init();
+
         // Create event loop
         let event_loop = EventLoop::new();
 
         // Load icon
-        let icon = match &config.icon {
+        let icon = match self.icon {
             Some(icon_path) => {
                 let image = image::open(icon_path).expect("Unable to find image");
                 Some(
@@ -50,44 +93,69 @@ impl Porter {
             None => None,
         };
 
-        // Create window
+        // Create window, with `margin`
         let builder = winit::window::WindowBuilder::new()
-            .with_title(&config.title)
+            .with_title(self.title)
             .with_visible(false)
             .with_window_icon(icon);
-
         let window = builder.build(&event_loop).unwrap();
         let mut size = window.current_monitor().unwrap().size();
-        size.width -= (config.margin * 2.0) as u32;
-        size.height -= (config.margin * 2.0) as u32;
+        size.width -= (self.margin * 2.0) as u32;
+        size.height -= (self.margin * 2.0) as u32;
         window.set_inner_size(size);
         window.set_outer_position(PhysicalPosition {
-            x: config.margin,
-            y: config.margin,
+            x: self.margin,
+            y: self.margin,
         });
 
-        // Init wgpu the whole reason we're playing the game lol
+        // Init [`wgpu`]
         let graphics = futures::executor::block_on(graphics::backend::State::new(&window));
+        // Init keyboard controller
         let keyboard = keyboard::Keyboard::new();
 
+        // After everything's loaded make window visible
         window.set_visible(true);
 
         let context = Context {
             graphics,
             keyboard,
             window,
-            config,
+            // Doesn't matter if we move here 'cause self is consumed
+            config: self.config,
         };
 
         (event_loop, context)
     }
-    pub fn run<T: 'static + TrainEngine>(
+}
+
+impl Default for ContextBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// A struct with this trait must be passed into [`main::run`]
+pub trait Runnable {
+    /// Runs every tick, as defined with [`ContextBuidler::with_ticks`]
+    /// Put your game logic here
+    fn tick(&mut self, ctx: &mut context::Context);
+
+    /// Runs every frame, which matches the refresh rate of whatever device the program
+    /// is run on. Use [`Context`]`.graphics.(render)` here
+    fn render(&self, ctx: &mut context::Context);
+}
+
+/// This module includes the [`main::run`] function
+pub mod main {
+    use super::*;
+    /// Takes in an [`EventLoop`] & [`Context`], both of which are generated from [`ContextBuilder::build`]
+    /// Also some sort of state that implements [`Runnable`]
+    pub fn run<T: 'static + Runnable>(
         event_loop: EventLoop<()>,
         mut context: Context,
         mut state: T,
     ) {
-        // Game "speed" or "update time" should be 60
-        // But render time should happen regardless of ticks
+        // Game "speed" or "update time"
         let ticks_per_second: f64 = context.config.ticks as f64;
         let nanos_per_tick: u128 = (1_000_000_000.0 / ticks_per_second).round() as u128;
         let mut frames = 0;
@@ -108,7 +176,7 @@ impl Porter {
                 Event::WindowEvent { ref event, .. } => {
                     if !context.keyboard.input(event) {
                         match event {
-                            WindowEvent::CloseRequested => Self::exit(control_flow),
+                            WindowEvent::CloseRequested => exit(control_flow),
                             WindowEvent::KeyboardInput {
                                 input:
                                     KeyboardInput {
@@ -117,7 +185,7 @@ impl Porter {
                                         ..
                                     },
                                 ..
-                            } => Self::exit(control_flow),
+                            } => exit(control_flow),
                             WindowEvent::Resized(size) => context.graphics.resize(*size),
                             WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                                 // new_inner_size is &&mut so we have to dereference it twice
@@ -178,11 +246,10 @@ impl Porter {
                             context.graphics.resize(*context.graphics.size())
                         }
                         // The system is out of memory, we should probably quit
-                        Err(wgpu::SurfaceError::OutOfMemory) => Self::exit(control_flow),
+                        Err(wgpu::SurfaceError::OutOfMemory) => exit(control_flow),
                         // All other errors (Outdated, Timeout) should be resolved by the next frame
                         Err(e) => eprintln!("Err: {:?}", e),
                     };
-                    // world.render(&mut state);
                 }
                 _ => (),
             }

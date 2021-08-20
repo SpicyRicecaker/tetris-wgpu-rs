@@ -7,12 +7,10 @@ use tetris::universe::Universe;
 fn main() {
     let universe = Universe::default();
 
-    let (event_loop, ctx) = thomas::Porter::build(thomas::Config {
-        title: universe.config.title().to_string(),
-        ticks: *universe.config.ticks(),
-        icon: None,
-        margin: 100.0,
-    });
+    let (event_loop, ctx) = thomas::ContextBuilder::new()
+        .with_title(universe.config.title())
+        .with_ticks(*universe.config.ticks())
+        .build();
 
-    thomas::Porter::run(event_loop, ctx, universe);
+    thomas::main::run(event_loop, ctx, universe);
 }
