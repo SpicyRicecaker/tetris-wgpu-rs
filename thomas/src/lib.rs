@@ -1,8 +1,40 @@
-//! This crate is a 2d framework. Internally, it's a wrapper over [`wgpu`] that takes great
-//! inspiration from `ggez` and `raylib`.
-//!
-//! Create a struct that implements the [`Runnable`] trait, a context using [`ContextBuilder`],
-//! Then start the game loop with [`main::run`]
+/*!
+# ThomasE
+This crate is a 2d framework. Internally, it's a wrapper over [`wgpu`] that takes great
+inspiration from [ggez](https://github.com/ggez/ggez) and [raylib](https://github.com/raysan5/raylib).
+
+## Getting Started
+Create a struct that implements the [`Runnable`] trait, a context using [`ContextBuilder`],
+Then start the game loop with [`main::run`]
+
+```
+use thomas::Color;
+
+struct Game {
+    playerx: f32,
+    playery: f32
+}
+
+impl Runnable for Game {
+    fn tick(&mut self, _ctx: &mut Context) {
+        self.playerx += 1;
+        self.playery += 1;
+    }
+    fn render(&self, ctx: &mut Context) {
+        ctx.graphics.clear_background(Color::from_hex("#000000"));
+        ctx.graphics.draw_square(playerx, playery, Color::from_hex("#FFFFFF"));
+    }
+}
+
+let game = Game {playerx: 0.0, playery: 0.0};
+
+let (event_loop, ctx) = thomas::ContextBuilder::new()
+    .with_title("Booboo")
+    .build();
+
+thomas::main::run(event_loop, ctx, universe);
+```
+*/
 
 pub mod context;
 use context::Context;
