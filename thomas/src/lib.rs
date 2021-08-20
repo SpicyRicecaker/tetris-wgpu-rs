@@ -3,6 +3,7 @@ use context::Context;
 pub mod graphics;
 mod keyboard;
 pub use graphics::frontend;
+use image::GenericImageView;
 pub use winit;
 
 use winit::dpi::PhysicalPosition;
@@ -11,6 +12,7 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
 };
 
+use std::path::PathBuf;
 use std::time::Instant;
 pub use wgpu::Color;
 
@@ -19,6 +21,7 @@ pub struct Config {
     pub title: String,
     pub ticks: u32,
     pub margin: f32,
+    pub icon: Option<PathBuf>,
 }
 
 pub struct Porter;
@@ -34,10 +37,25 @@ impl Porter {
         env_logger::init();
         // Create event loop
         let event_loop = EventLoop::new();
+
+        // Load icon
+        let icon = match &config.icon {
+            Some(icon_path) => {
+                let image = image::open(icon_path).expect("Unable to find image");
+                Some(
+                    winit::window::Icon::from_rgba(image.to_bytes(), image.width(), image.height())
+                        .expect("Bad image"),
+                )
+            }
+            None => None,
+        };
+
         // Create window
         let builder = winit::window::WindowBuilder::new()
             .with_title(&config.title)
-            .with_visible(false);
+            .with_visible(false)
+            .with_window_icon(icon);
+
         let window = builder.build(&event_loop).unwrap();
         let mut size = window.current_monitor().unwrap().size();
         size.width -= (config.margin * 2.0) as u32;
@@ -58,7 +76,7 @@ impl Porter {
             graphics,
             keyboard,
             window,
-            config
+            config,
         };
 
         (event_loop, context)
