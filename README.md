@@ -1,6 +1,6 @@
 # Tetris-wgpu-rs
 
-A port of [tetris-rs](https://github.com/SpicyRicecaker/tetris-rs) -> [wgpu](https://github.com/gfx-rs/wgpu), also using [rodio](https://github.com/RustAudio/rodio) for audio. Api inspiration for `thomas engine` from [ggez](https://github.com/ggez/ggez).
+A port of [raylib-tetris](https://github.com/SpicyRicecaker/tetris-rs) -> [wgpu](https://github.com/gfx-rs/wgpu), also using [rodio](https://github.com/RustAudio/rodio) for audio. Api inspiration for `thomas engine` from [ggez](https://github.com/ggez/ggez).
 
 ![Picture of Tetris Game Over Screen](https://raw.githubusercontent.com/SpicyRicecaker/tetris-wgpu-rs/master/tetris/resources/game_over.jpg)
 
