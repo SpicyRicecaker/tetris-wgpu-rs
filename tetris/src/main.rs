@@ -16,11 +16,8 @@ fn main() {
     };
 
     // Thinking of maybe moving this icon dir to be ctx.window.set_icon after initializing the resource dir
-    let mut icon_dir = {
-        let mut t = resource_dir.clone();
-        t.push("icon.ico");
-        t
-    };
+    let mut icon_dir = resource_dir.clone();
+    icon_dir.push("icon.ico");
 
     let (event_loop, ctx) = thomas::ContextBuilder::new()
         .with_title(universe.config.title())
