@@ -3,7 +3,7 @@ pub enum RotationDirection {
     CounterClockwise,
 }
 impl RotationDirection {
-    // Gets reverse
+    /// Gets reverse
     pub fn flip(direction: RotationDirection) -> RotationDirection {
         match direction {
             RotationDirection::Clockwise => RotationDirection::CounterClockwise,

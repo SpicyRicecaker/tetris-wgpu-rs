@@ -1,18 +1,23 @@
 pub mod circular_num;
 pub mod collisions;
 pub mod coord;
-pub mod direction;
 pub mod tetromino_type;
 
 use circular_num::*;
 use coord::*;
-use direction::*;
 use tetromino_type::*;
 use thomas::context::Context;
 
 use super::universe::{color::ColorPalette, Dimensions};
 use super::Config;
 
+pub enum MoveDirection {
+    Up,
+    Down,
+    Left,
+    Right,
+    None,
+}
 /// Built off tetromino coords
 #[derive(Clone)]
 pub struct Tetromino {
@@ -110,12 +115,13 @@ impl Tetromino {
         }
     }
 
-    pub fn get_dxdy(direction: Direction) -> [i32; 2] {
+    pub fn get_dxdy(direction: MoveDirection) -> [i32; 2] {
         match direction {
-            Direction::Down => [0, -1],
-            Direction::Up => [0, 1],
-            Direction::Left => [-1, 0],
-            Direction::Right => [1, 0],
+            MoveDirection::Down => [0, -1],
+            MoveDirection::Up => [0, 1],
+            MoveDirection::Left => [-1, 0],
+            MoveDirection::Right => [1, 0],
+            MoveDirection::None => [0, 0],
         }
     }
 

@@ -71,11 +71,9 @@ impl Universe {
             // Test collisions
             // First make sure it's in boundaries
             if Tetromino::within_boundary(&self.focused_tetromino, dx_dy, &self.dim)
-                && !Tetromino::will_collide_all(
-                    &self.focused_tetromino,
-                    &self.stagnant_tetrominos,
-                    dx_dy,
-                )
+                && !self
+                    .focused_tetromino
+                    .will_collide_diff(&self.stagnant_tetrominos, dx_dy)
             {
                 // Move tetrimino
                 self.focused_tetromino_mut().move_by(dx_dy);
@@ -92,5 +90,4 @@ impl Universe {
         // Good place to add sound as well
         self.rotate_focused(RotationDirection::flip(rot_direction));
     }
-
 }

@@ -1,11 +1,11 @@
-// Prevent popup of console window
-#![cfg_attr(not(debug_assetions), windows_subsystem = "windows")]
+// Prevent popup of console window on release builds
+// #![cfg_attr(not(debug_assetions), windows_subsystem = "windows")]
 
 use std::path::PathBuf;
-use tetris::universe::Universe;
+use tetris::{config::Config, universe::Universe};
 
 fn main() {
-    let mut universe = Universe::default();
+    let config = Config::default();
 
     // Basically checking if we're in dev env or production
     let resource_dir: PathBuf = if let Some(manifest_dir) = option_env!("CARGO_MANIFEST_DIR") {
@@ -18,13 +18,14 @@ fn main() {
     let mut icon_dir = resource_dir.clone();
     icon_dir.push("icon.ico");
 
-    let (event_loop, ctx) = thomas::ContextBuilder::new()
-        .with_title(universe.config.title())
-        .with_ticks(*universe.config.ticks())
+    let (event_loop, mut ctx) = thomas::ContextBuilder::new()
+        .with_title(config.title())
+        .with_ticks(*config.ticks())
         .with_resource_dir(resource_dir)
         .with_icon(icon_dir)
         .build();
 
+    let mut universe = Universe::new(&mut ctx, config);
     // We're going to update universe config with window size
     // TODO support updating window size on resize window
     universe.config.resize(

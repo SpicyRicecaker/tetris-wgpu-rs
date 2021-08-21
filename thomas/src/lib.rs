@@ -44,9 +44,10 @@ mod keyboard;
 pub use graphics::frontend;
 use image::GenericImageView;
 use resource::ResourceManager;
+pub use rodio;
 pub use winit;
+pub mod audio;
 mod resource;
-mod audio;
 
 use winit::dpi::PhysicalPosition;
 use winit::{
@@ -170,7 +171,7 @@ impl ContextBuilder {
             audio,
             // Doesn't matter if we move here 'cause self is consumed
             config: self.config,
-            resource_mgr
+            resource_mgr,
         };
 
         (event_loop, context)

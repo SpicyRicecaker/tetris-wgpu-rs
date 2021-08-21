@@ -1,6 +1,5 @@
 mod tetris_input;
 mod tetromino;
-mod tests;
 pub mod config;
 
 /// Universe is where all the functionality is

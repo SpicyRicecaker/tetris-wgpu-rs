@@ -1,3 +1,4 @@
+mod audio;
 pub mod color;
 mod game;
 mod input;
@@ -11,10 +12,11 @@ use tetromino::tetromino_type::TetrominoType;
 use color::ColorPalette;
 use game::Game;
 
-use thomas::context::Context;
+use thomas::{context::Context, rodio::Source};
+
+use self::audio::Audio;
 
 use super::*;
-use direction::*;
 
 const INITIAL_WIDTH: u32 = 10;
 const INITIAL_HEIGHT: u32 = 20;
@@ -34,7 +36,7 @@ pub struct Universe {
     // Game mechanics
     game: Game,
     // Sound system
-    sound_playing: bool,
+    audio: Audio,
     pub config: Config,
 }
 
@@ -52,18 +54,22 @@ impl thomas::Runnable for Universe {
         self.full_fall_focused();
 
         self.tetromino_controls.tick(ctx);
-        self.receive_key();
+        self.receive_key(ctx);
 
         // Literally just move current .y down
         // Falls at the rate of 6 per second
 
         if self.game.should_fall() {
-            self.fall_focused();
+            self.fall_focused(ctx);
             // I guess we'll just scan for audio here
-            if !self.sound_playing {
-                let file = ctx.resource_mgr.open_file("music.ogg").unwrap();
-                ctx.audio.play(file).unwrap();
-                self.sound_playing = !self.sound_playing;
+            if self.audio.sink.is_none() {
+                dbg!("Hello, loading music");
+                let d = thomas::audio::configure_audio_vorbis(ctx, "music.ogg")
+                    .expect("Troulbe loading file")
+                    .stoppable()
+                    .repeat_infinite();
+                self.audio.sink =
+                    Some(thomas::audio::play_source(ctx, d).expect("Trouble playing file"));
             }
         }
 
@@ -89,6 +95,8 @@ impl thomas::Runnable for Universe {
         if levels.is_empty() {
             return;
         }
+        // we should play a sound effect here since it means we cleared a row
+        thomas::audio::play_once_vorbis(ctx, "line_clear.ogg").expect("unable to play audio");
 
         // ...Otherwise, if there is a full row...
 
@@ -112,22 +120,25 @@ impl thomas::Runnable for Universe {
         }
 
         // Then prepare to move the other tetriminos down (gravity)
-        let mut diff = vec![0; self.dim.h as usize];
-        for level in levels.iter() {
-            Universe::change_arr_from_idx(&mut diff, *level, 1);
-        }
+        let mut diff = [0; 24];
+        levels
+            .iter()
+            .for_each(|&l| Universe::change_arr_from_idx(&mut diff, l, 1));
 
         // Finally,if something happened try to move pieces down if they need to be moved
         // fk, we're iterating over stagnant tetrominos like 3 times. We honestly only need to really do it twice if we store the hashmap
         // If we implemented it with an array we would only need to iterate over the board once
         for i in 0..self.stagnant_tetrominos.len() {
             for j in 0..self.stagnant_tetrominos[i].coords().len() {
+                // TODO this line has the possbility of crashing, since if we have a line tetromino,
+                // it might end up such that we're above 20
+                // best way to deal with this is to init the size of the array as 24, like the official tetris guidelines say
                 self.stagnant_tetrominos[i].coords_mut()[j].y -=
                     diff[self.stagnant_tetrominos[i].coords()[j].y as usize];
             }
         }
 
-        self.game.update(levels.len() as u32);
+        self.game.update(levels.len() as u32, ctx);
     }
 
     fn render(&self, ctx: &mut Context) {
@@ -142,9 +153,9 @@ impl thomas::Runnable for Universe {
             .render(ctx, &self.config, &self.dim, &self.color_palette);
 
         // And every other tetrimino
-        for tetromino in self.stagnant_tetrominos().iter() {
-            tetromino.render(ctx, &self.config, &self.dim, &self.color_palette);
-        }
+        self.stagnant_tetrominos().iter().for_each(|t| {
+            t.render(ctx, &self.config, &self.dim, &self.color_palette);
+        });
 
         // Render the ghost
         self.ghost()
@@ -212,91 +223,76 @@ impl Dimensions {
 }
 
 impl Universe {
-    pub fn new(
-        dims: Dimensions,
-        focused_tetromino: Tetromino,
-        stagnant_tetrominos: Vec<Tetromino>,
-        tetromino_controls: TetrominoControls,
-        color_palette: ColorPalette,
-        game: Game,
-        ghost: Tetromino,
-        sound_playing: bool,
-        config: Config,
-    ) -> Self {
+    pub fn new(ctx: &mut Context, config: Config) -> Self {
         Universe {
-            dim: dims,
-            focused_tetromino,
-            stagnant_tetrominos,
-            tetromino_controls,
-            color_palette,
-            game,
-            ghost,
-            sound_playing,
+            dim: Dimensions {
+                w: INITIAL_WIDTH,
+                h: INITIAL_HEIGHT,
+            },
+            focused_tetromino: TetrominoType::generate_tetromino_rand(),
+            ghost: TetrominoType::generate_tetromino_rand(),
+            stagnant_tetrominos: vec![],
+            tetromino_controls: TetrominoControls::default(),
+            color_palette: ColorPalette::default(),
+            game: Game::default(),
+            audio: Audio::new(ctx),
             config,
         }
     }
 
-    fn fall_focused(&mut self) {
-        // Code that determines moving the pieces down
-        let within_boundary = self
+    fn within_boundary(&self) -> bool {
+        self.focused_tetromino
+            .within_boundary(Tetromino::get_dxdy(MoveDirection::Down), &self.dim)
+    }
+
+    fn generate_new_tetromino(&mut self, ctx: &mut Context) {
+        // Generate a new current, swap it with the current current,
+        // then solidifying it by pushing it into stagnant tetrominos
+        let mut t = TetrominoType::generate_tetromino_rand();
+        std::mem::swap(&mut self.focused_tetromino, &mut t);
+        self.stagnant_tetrominos.push(t);
+
+        // Play a sound effect
+        thomas::audio::play_once_vorbis(ctx, "hard_drop.ogg").expect("Playback error");
+
+        // If it generates into a piece, game ova
+        if self
             .focused_tetromino
-            .within_boundary(Tetromino::get_dxdy(Direction::Down), &self.dim);
-        let mut collision = false;
-
-        if within_boundary {
-            collision = Tetromino::will_collide_all(
-                &self.focused_tetromino,
-                &self.stagnant_tetrominos,
-                Tetromino::get_dxdy(Direction::Down),
-            );
+            .will_collide_towards(&self.stagnant_tetrominos, MoveDirection::None)
+        {
+            // Game over
+            self.game.pause();
         }
+    }
 
-        if !collision && within_boundary {
+    fn fall_focused(&mut self, ctx: &mut Context) {
+        if self.within_boundary()
+            && !self
+                .focused_tetromino
+                .will_collide_towards(&self.stagnant_tetrominos, MoveDirection::Down)
+        {
             self.focused_tetromino
-                .move_by(Tetromino::get_dxdy(Direction::Down));
+                .move_by(Tetromino::get_dxdy(MoveDirection::Down));
         } else {
-            // Solidify the old current
-            self.stagnant_tetrominos
-                .push(self.focused_tetromino.clone());
-            // Generate a new current
-            self.focused_tetromino = TetrominoType::generate_tetromino_rand();
-
-            // If it generates into a piece, game ova
-            if Tetromino::will_collide_all(
-                &self.focused_tetromino,
-                &self.stagnant_tetrominos,
-                [0, 0],
-            ) {
-                // Game over
-                self.game.pause();
-            }
+            self.generate_new_tetromino(ctx);
         }
     }
 
     /// Implmentation of hard drop preview
     pub fn full_fall_focused(&mut self) {
         self.ghost = self.focused_tetromino.clone();
-        loop {
-            // Code that determines moving the pieces down
-            let within_boundary = self
+
+        // While it's within boundary and won't collide with anything
+        // TODO I swear I have no clue wtf I'm looking at but
+        while self
+            .ghost
+            .within_boundary(Tetromino::get_dxdy(MoveDirection::Down), &self.dim)
+            && !self
                 .ghost
-                .within_boundary(Tetromino::get_dxdy(Direction::Down), &self.dim);
-
-            let mut collision = false;
-
-            if within_boundary {
-                collision = Tetromino::will_collide_all(
-                    &self.ghost,
-                    &self.stagnant_tetrominos,
-                    Tetromino::get_dxdy(Direction::Down),
-                );
-            }
-
-            if !collision && within_boundary {
-                self.ghost.move_by(Tetromino::get_dxdy(Direction::Down));
-            } else {
-                return;
-            }
+                .will_collide_towards(&self.stagnant_tetrominos, MoveDirection::Down)
+        {
+            // Move it down
+            self.ghost.move_by(Tetromino::get_dxdy(MoveDirection::Down));
         }
     }
 
@@ -313,10 +309,10 @@ impl Universe {
         }
     }
 
+    /// The most complicated function ever
+    /// Basically increase array value from [idx..len] += diff
     pub fn change_arr_from_idx(arr: &mut [u32], idx: u32, diff: u32) {
-        for num in arr.iter_mut().skip(idx as usize) {
-            *num += diff;
-        }
+        arr.iter_mut().skip(idx as usize).for_each(|n| *n += diff);
     }
 
     /// Renders the 10x20 grid that tetrominos spawn on oo
@@ -333,42 +329,37 @@ impl Universe {
                 0_f32,
                 current_x,
                 *self.config.h(),
-                4_f32,
+                4.0,
                 self.color_palette.line(),
             )
-        })
-
-        // for x in (0..=self.w).into_iter() {
+        });
+        // (0..=self.dim.w).into_iter().for_each(|x| {
         //     // For every implement of x, draw from the ground to the ceiling
-        //     let current_x = x * dx + *config.canvas_l() as u32;
-        //     d.draw_line_ex(
-        //         Vector2 {
-        //             x: current_x as f32,
-        //             y: 0_f32,
-        //         },
-        //         Vector2 {
-        //             x: current_x as f32,
-        //             y: *config.h() as f32,
-        //         },
-        //         0.5_f32,
+        //     let current_x = x as f32 * dx + self.config.canvas_l();
+        //     ctx.graphics.draw_line(
+        //         current_x,
+        //         0_f32,
+        //         current_x,
+        //         *self.config.h(),
+        //         1.0,
         //         self.color_palette.line(),
         //     );
-        // }
-        // for y in (0..=self.h).into_iter() {
-        //     let current_y = y * dy;
-        //     d.draw_line_ex(
-        //         Vector2 {
-        //             x: *config.canvas_l() as f32,
-        //             y: current_y as f32,
-        //         },
-        //         Vector2 {
-        //             x: *config.canvas_r() as f32,
-        //             y: current_y as f32,
-        //         },
-        //         0.5_f32,
+        // });
+
+        // let dy = *self.config.h() / self.dim.h as f32;
+
+        // (0..=self.dim.h).into_iter().for_each(|y| {
+        //     // For every implement of x, draw from the ground to the ceiling
+        //     let current_y = y as f32 * dy + self.config.canvas_l();
+        //     ctx.graphics.draw_line(
+        //         *self.config.canvas_l(),
+        //         current_y,
+        //         *self.config.canvas_r(),
+        //         current_y,
+        //         3.0,
         //         self.color_palette.line(),
         //     );
-        // }
+        // });
     }
 }
 
@@ -396,24 +387,5 @@ impl Universe {
 
     pub fn stagnant_tetrominos_mut(&mut self) -> &mut Vec<Tetromino> {
         &mut self.stagnant_tetrominos
-    }
-}
-
-impl Default for Universe {
-    fn default() -> Self {
-        Universe::new(
-            Dimensions {
-                w: INITIAL_WIDTH,
-                h: INITIAL_HEIGHT,
-            },
-            TetrominoType::generate_tetromino_rand(),
-            vec![],
-            TetrominoControls::default(),
-            ColorPalette::default(),
-            Game::default(),
-            TetrominoType::generate_tetromino_rand(),
-            false,
-            Config::default(),
-        )
     }
 }

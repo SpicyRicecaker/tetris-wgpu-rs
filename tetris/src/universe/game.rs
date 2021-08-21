@@ -1,3 +1,5 @@
+use thomas::context::Context;
+
 // Single, double, triple, tetris, based off of gameboy
 const SCORE: [u32; 4] = [40, 100, 300, 1200];
 // Speeds for levels 3-20, based off of gameboy
@@ -25,16 +27,6 @@ impl Game {
         &self.running
     }
 
-    /// Get a reference to the universe's ticks.
-    pub fn ticks(&self) -> &u32 {
-        &self.ticks
-    }
-
-    /// Get a mutable reference to the universe's ticks.
-    pub fn ticks_mut(&mut self) -> &mut u32 {
-        &mut self.ticks
-    }
-
     /// Get a reference to the game's level.
     pub fn level(&self) -> &u32 {
         &self.level
@@ -52,18 +44,19 @@ impl Game {
         self.running = false;
     }
     /// Sets running state to true
-    pub fn resume(&mut self) {
+    /// TODO `p` button to pause
+    pub fn _resume(&mut self) {
         self.running = true;
     }
 
     /// Updates score, # of lines cleared, and level
-    pub fn update(&mut self, lines_cleared: u32) {
+    pub fn update(&mut self, lines_cleared: u32, ctx: &mut Context) {
         // First update score
         self.update_score(lines_cleared);
         // Next update lines cleared
         self.lines_cleared += lines_cleared;
         // Next update levels, based on lines cleared
-        self.update_level();
+        self.update_level(ctx);
     }
 
     /// Should never get called with 0 probably
@@ -73,10 +66,14 @@ impl Game {
     }
 
     /// Changes level based on self. num of lines cleared
-    fn update_level(&mut self) {
+    fn update_level(&mut self, ctx: &mut Context) {
         // level goes up every 10 lines, capped at 20
+        let prev = self.level;
         self.level =
             ((self.lines_cleared as f32 / LINES_PER_LEVEL as f32).floor() as u32).min(LVL_CAP);
+        if self.level > prev {
+            thomas::audio::play_once_vorbis(ctx, "lvl_up.ogg").expect("unable to level up");
+        }
     }
 
     pub fn fast_move_down_score(&mut self) {

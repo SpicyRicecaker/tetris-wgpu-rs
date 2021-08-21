@@ -6,7 +6,7 @@ use utils::*;
 // The framework that keyboard input and keys are built on
 
 pub trait InputInterface {
-    fn receive_key(&mut self);
+    fn receive_key(&mut self, ctx: &mut Context);
 }
 // Our implementation of tetrominos
 pub struct TetrominoControls {

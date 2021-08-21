@@ -17,17 +17,16 @@ impl ResourceManager {
         self.path = path;
     }
 
-    pub fn open_file(&mut self, path: &str) -> Result<File, std::io::Error> {
+    pub fn load_file(&mut self, path: &str) -> Result<File, std::io::Error> {
         // Try getting a path to the resource
         self.path.push(path);
-        dbg!(&self.path);
         let file = File::open(&self.path)?;
         self.path.pop();
         Ok(file)
     }
 
     /// Loads raw data from file
-    pub fn load(&mut self, resource: &str) -> Result<Vec<u8>, std::io::Error> {
+    pub fn load_data(&mut self, resource: &str) -> Result<Vec<u8>, std::io::Error> {
         // Try getting a path to the resource
         self.path.push(resource);
         let res = std::fs::read(&self.path);
