@@ -61,7 +61,7 @@ impl thomas::Runnable for Universe {
             self.fall_focused();
             // I guess we'll just scan for audio here
             if !self.sound_playing {
-                let file = ctx.resource_mgr.open_file("music.wav").unwrap();
+                let file = ctx.resource_mgr.open_file("music.ogg").unwrap();
                 ctx.audio.play(file).unwrap();
                 self.sound_playing = !self.sound_playing;
             }
