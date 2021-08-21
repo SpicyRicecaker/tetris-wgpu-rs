@@ -1,15 +1,14 @@
+use std::env;
 use std::path::PathBuf;
 use tetris::{config::Config, universe::Universe};
 
 fn main() {
     let config = Config::default();
 
-    // Basically checking if we're in dev env or production
-    let resource_dir: PathBuf = if let Some(manifest_dir) = option_env!("CARGO_MANIFEST_DIR") {
-        [manifest_dir, "resources"].iter().collect()
-    } else {
-        PathBuf::from("./resources")
-    };
+    #[cfg(debug_assertions)]
+    let resource_dir: PathBuf = [env!("CARGO_MANIFEST_DIR"), "resources"].iter().collect();
+    #[cfg(not(debug_assertions))]
+    let resource_dir = tetris::prod::res();
 
     // Thinking of maybe moving this icon dir to be ctx.window.set_icon after initializing the resource dir
     let mut icon_dir = resource_dir.clone();

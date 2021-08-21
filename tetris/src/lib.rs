@@ -1,6 +1,7 @@
 mod tetris_input;
 mod tetromino;
 pub mod config;
+pub mod prod;
 
 /// Universe is where all the functionality is
 pub mod universe;

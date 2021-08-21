@@ -1,6 +1,6 @@
 [package]
 name = "tetris"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["SpicyRicecaker <awesomenessisgolden@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/SpicyRicecaker/tetris-wgpu-rs"
