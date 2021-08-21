@@ -6,7 +6,7 @@ fn _include_windows() {
 }
 
 fn main() {
-    #[cfg(windows)]
     #[cfg(not(debug_assertions))]
+    #[cfg(windows)]
     _include_windows();
 }

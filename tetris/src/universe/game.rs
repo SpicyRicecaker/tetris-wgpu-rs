@@ -2,7 +2,7 @@
 const SCORE: [u32; 4] = [40, 100, 300, 1200];
 // Speeds for levels 3-20, based off of gameboy
 const FRAMES_PER_FALL: [u32; 21] = [
-    53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3,
+    1, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3,
 ];
 const LVL_CAP: u32 = 20;
 const LINES_PER_LEVEL: u32 = 10;

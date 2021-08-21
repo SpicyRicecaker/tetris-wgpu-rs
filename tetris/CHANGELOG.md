@@ -17,7 +17,7 @@
   - [x] Need to add the offset tables
 - [x] Game Over / Restart Screen
 - [x] colors
-- [ ] add hard drop + preview
+- [x] add hard drop + preview
 - [ ] sound
   - [ ] music in the background
   - [ ] TETRIS for !

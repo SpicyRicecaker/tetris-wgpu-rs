@@ -37,6 +37,7 @@ thomas::main::run(event_loop, ctx, universe);
 */
 
 pub mod context;
+use audio::Audio;
 use context::Context;
 pub mod graphics;
 mod keyboard;
@@ -45,6 +46,7 @@ use image::GenericImageView;
 use resource::ResourceManager;
 pub use winit;
 mod resource;
+mod audio;
 
 use winit::dpi::PhysicalPosition;
 use winit::{
@@ -159,10 +161,13 @@ impl ContextBuilder {
 
         let resource_mgr = ResourceManager::new(self.resource_mgr);
 
+        let audio = Audio::new();
+
         let context = Context {
             graphics,
             keyboard,
             window,
+            audio,
             // Doesn't matter if we move here 'cause self is consumed
             config: self.config,
             resource_mgr

@@ -33,6 +33,8 @@ pub struct Universe {
     color_palette: ColorPalette,
     // Game mechanics
     game: Game,
+    // Sound system
+    sound_playing: bool,
     pub config: Config,
 }
 
@@ -44,7 +46,6 @@ impl thomas::Runnable for Universe {
         }
 
         // Set level of the game
-
         self.game.tick();
 
         // update preview/ghost
@@ -58,6 +59,12 @@ impl thomas::Runnable for Universe {
 
         if self.game.should_fall() {
             self.fall_focused();
+            // I guess we'll just scan for audio here
+            if !self.sound_playing {
+                let file = ctx.resource_mgr.open_file("music.wav").unwrap();
+                ctx.audio.play(file).unwrap();
+                self.sound_playing = !self.sound_playing;
+            }
         }
 
         let mut levels: HashMap<u32, u32> = HashMap::new();
@@ -136,12 +143,12 @@ impl thomas::Runnable for Universe {
 
         // And every other tetrimino
         for tetromino in self.stagnant_tetrominos().iter() {
-            tetromino.render(ctx,&self.config, &self.dim, &self.color_palette);
+            tetromino.render(ctx, &self.config, &self.dim, &self.color_palette);
         }
 
         // Render the ghost
         self.ghost()
-            .render_alpha(ctx,&self.config, &self.dim, &self.color_palette);
+            .render_alpha(ctx, &self.config, &self.dim, &self.color_palette);
 
         // If game is in an 'over' state
         if !self.game.running() {
@@ -213,6 +220,7 @@ impl Universe {
         color_palette: ColorPalette,
         game: Game,
         ghost: Tetromino,
+        sound_playing: bool,
         config: Config,
     ) -> Self {
         Universe {
@@ -223,6 +231,7 @@ impl Universe {
             color_palette,
             game,
             ghost,
+            sound_playing,
             config,
         }
     }
@@ -403,6 +412,7 @@ impl Default for Universe {
             ColorPalette::default(),
             Game::default(),
             TetrominoType::generate_tetromino_rand(),
+            false,
             Config::default(),
         )
     }

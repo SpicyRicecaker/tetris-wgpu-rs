@@ -3,6 +3,7 @@ mod tetromino;
 mod tests;
 pub mod config;
 
+/// Universe is where all the functionality is
 pub mod universe;
 
 use std::collections::HashMap;
@@ -11,7 +12,3 @@ use tetromino::*;
 use config::Config;
 
 use tetris_input::*;
-
-
-
-// The board for the tetris board
