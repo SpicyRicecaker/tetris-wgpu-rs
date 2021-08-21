@@ -1,6 +1,3 @@
-// Prevent popup of console window on release builds
-// #![cfg_attr(not(debug_assetions), windows_subsystem = "windows")]
-
 use std::path::PathBuf;
 use tetris::{config::Config, universe::Universe};
 

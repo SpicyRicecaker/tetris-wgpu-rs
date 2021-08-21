@@ -63,7 +63,6 @@ impl thomas::Runnable for Universe {
             self.fall_focused(ctx);
             // I guess we'll just scan for audio here
             if self.audio.sink.is_none() {
-                dbg!("Hello, loading music");
                 let d = thomas::audio::configure_audio_vorbis(ctx, "music.ogg")
                     .expect("Troulbe loading file")
                     .stoppable()

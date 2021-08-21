@@ -24,7 +24,6 @@ impl FontInterface {
     }
     pub fn add_font(&mut self, font: FontArc) {
         self.glyph_brush.add_font(font);
-        // dbg!(self.glyph_brush.fonts());
     }
     pub fn finish(&mut self) {
         self.staging_belt.finish()
