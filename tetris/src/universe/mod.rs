@@ -46,6 +46,7 @@ impl thomas::Runnable for Universe {
             self.game_over(ctx);
             return;
         }
+        self.game_over(ctx);
 
         // Set level of the game
         self.game.tick();
