@@ -1,6 +1,5 @@
 // Prevent popup of console window
-// Don't know how to declare it only for release builds...
-// #![windows_subsystem = "windows"]
+#![cfg_attr(not(debug_assetions), windows_subsystem = "windows")]
 
 use std::path::PathBuf;
 use tetris::universe::Universe;
@@ -25,10 +24,13 @@ fn main() {
         .with_resource_dir(resource_dir)
         .with_icon(icon_dir)
         .build();
-    
+
     // We're going to update universe config with window size
     // TODO support updating window size on resize window
-    universe.config.resize(ctx.graphics.size.width as f32, ctx.graphics.size.height as f32);
+    universe.config.resize(
+        ctx.graphics.size.width as f32,
+        ctx.graphics.size.height as f32,
+    );
 
     thomas::main::run(event_loop, ctx, universe);
 }

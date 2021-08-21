@@ -1,12 +1,11 @@
 #[inline]
-fn _include_windows() {
+fn include_windows() {
     let mut res = winres::WindowsResource::new();
     res.set_icon("resources/icon.ico");
     res.compile().unwrap();
 }
 
 fn main() {
-    #[cfg(not(debug_assertions))]
-    #[cfg(windows)]
-    _include_windows();
+    #[cfg_attr(not(debug_assetions), cfg(windows))]
+    include_windows();
 }
