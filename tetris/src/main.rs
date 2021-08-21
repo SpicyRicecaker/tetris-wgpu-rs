@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use tetris::universe::Universe;
 
 fn main() {
-    let universe = Universe::default();
+    let mut universe = Universe::default();
 
     // Basically checking if we're in dev env or production
     let resource_dir: PathBuf = if let Some(manifest_dir) = option_env!("CARGO_MANIFEST_DIR") {
@@ -25,6 +25,10 @@ fn main() {
         .with_resource_dir(resource_dir)
         .with_icon(icon_dir)
         .build();
+    
+    // We're going to update universe config with window size
+    // TODO support updating window size on resize window
+    universe.config.resize(ctx.graphics.size.width as f32, ctx.graphics.size.height as f32);
 
     thomas::main::run(event_loop, ctx, universe);
 }

@@ -1,27 +1,45 @@
-pub struct Config {
-    ticks: u32,
+const LETTERBOX_RATIO: f32 = 9.0 / 32.0;
+
+pub struct Dimensions {
     w: f32,
     h: f32,
-    title: String,
     actual_w: f32,
     canvas_l: f32,
     canvas_r: f32,
 }
 
-impl Config {
-    pub fn new(ticks: u32, w: f32, h: f32, title: String) -> Self {
-        let actual_w = w * (9.0 / 32.0);
+impl Dimensions {
+    fn new(w: f32, h: f32) -> Self {
+        // Actual tetris board is the area left after taking away the letterbox ratio
+        let actual_w = w * LETTERBOX_RATIO;
+        // Calculate the postiion at the left point at which the board starts
         let canvas_l = (w - actual_w) / 2.0;
+        // Calculate the postiion at the right point at which the board ends
         let canvas_r = canvas_l + actual_w;
-
-        Config {
-            ticks,
-            w,
+        Self {
+            w, 
             h,
-            title,
             actual_w,
             canvas_l,
-            canvas_r,
+            canvas_r
+        }
+    }
+
+}
+
+pub struct Config {
+    ticks: u32,
+    title: String,
+    pub dimensions: Dimensions,
+}
+
+impl Config {
+    pub fn new(ticks: u32, w: f32, h: f32, title: String) -> Self {
+        let dimensions = Dimensions::new(w, h);
+        Config {
+            ticks,
+            title,
+            dimensions
         }
     }
 
@@ -35,30 +53,36 @@ impl Config {
         &self.title
     }
 
+    /// Resizes the board
+    pub fn resize(&mut self, w: f32, h: f32) {
+        self.dimensions = Dimensions::new(w, h);
+    }
+
     /// Get a reference to the config's h.
     pub fn h(&self) -> &f32 {
-        &self.h
+        &self.dimensions.h
     }
 
     /// Get a reference to the config's w
     pub fn w(&self) -> &f32 {
-        &self.w
+        &self.dimensions.w
     }
 
     /// Get a reference to the config's actual w.
     pub fn actual_w(&self) -> &f32 {
-        &self.actual_w
+        &self.dimensions.actual_w
     }
 
     /// Get a reference to the config's canvas l.
     pub fn canvas_l(&self) -> &f32 {
-        &self.canvas_l
+        &self.dimensions.canvas_l
     }
 
     /// Get a reference to the config's canvas r.
     pub fn canvas_r(&self) -> &f32 {
-        &self.canvas_r
+        &self.dimensions.canvas_r
     }
+
 }
 impl Default for Config {
     fn default() -> Self {
