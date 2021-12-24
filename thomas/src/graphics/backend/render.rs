@@ -11,7 +11,7 @@ impl State {
         );
     }
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let frame = self.surface.get_current_frame()?.output;
+        let frame = self.surface.get_current_texture()?;
         let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -92,6 +92,7 @@ impl State {
             self.font_interface.finish();
         }
         self.queue.submit(Some(encoder.finish()));
+        frame.present();
         Ok(())
     }
 

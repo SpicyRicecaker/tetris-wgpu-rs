@@ -26,14 +26,14 @@ impl State {
             vertex: wgpu::VertexState {
                 module: shader,
                 // Specify the entry point function for shaders, set by [[stage(fragment)]]
-                entry_point: "main",
+                entry_point: "vs_main",
                 // We should pass in info into the shader itself, right now we're creating it in the shader for hello world
                 buffers: &[buffers::Vertex::desc()],
             },
             // Fragment technically opt
             fragment: Some(wgpu::FragmentState {
                 module: shader,
-                entry_point: "main",
+                entry_point: "fs_main",
                 // Target color output for swap chain, replace old pixels, and write to all colors
                 targets: &[wgpu::ColorTargetState {
                     format: sc_desc.format,
@@ -41,23 +41,10 @@ impl State {
                     write_mask: wgpu::ColorWrites::ALL,
                 }],
             }),
-            primitive: wgpu::PrimitiveState {
-                // Each of 3 vertices (of x, y) correspond to vertices of traingle
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                // Ccw = triangle is facing forward
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
-                polygon_mode: wgpu::PolygonMode::Fill,
-                clamp_depth: false,
-                conservative: false,
-            },
+            primitive: wgpu::PrimitiveState::default(),
             depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
         })
     }
 }

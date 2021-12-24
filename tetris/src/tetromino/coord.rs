@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Coord {
     pub x: u32,
     pub y: u32,
@@ -19,11 +19,5 @@ impl Coord {
     }
     pub fn mut_y(&mut self) -> &mut u32 {
         &mut self.y
-    }
-}
-
-impl Default for Coord {
-    fn default() -> Self {
-        Coord { x: 0, y: 0 }
     }
 }
