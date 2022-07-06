@@ -6,14 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.26.0"
-wgpu = "0.12.0"
-futures = "0.3.19"
-bytemuck = { version = "1.7.3", features = ["derive"] }
-image = "0.23.14"
-anyhow = "1.0.52"
+winit = "0.26.1"
+wgpu = "0.13.1"
+futures = "0.3.21"
+bytemuck = { version = "1.10.0", features = ["derive"] }
+image = "0.24.2"
+anyhow = "1.0.58"
 cgmath = "0.18.0"
-wgpu_glyph = "0.16.0"
-log = "0.4.14"
+wgpu_glyph = "0.17.0"
+log = "0.4.17"
 env_logger = "0.9.0"
-rodio = "0.14.0"
+rodio = "0.15.0"

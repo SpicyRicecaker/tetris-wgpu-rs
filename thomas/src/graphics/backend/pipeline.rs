@@ -35,11 +35,11 @@ impl State {
                 module: shader,
                 entry_point: "fs_main",
                 // Target color output for swap chain, replace old pixels, and write to all colors
-                targets: &[wgpu::ColorTargetState {
+                targets: &[Some(wgpu::ColorTargetState {
                     format: sc_desc.format,
                     blend: Some(wgpu::BlendState::ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
-                }],
+                })],
             }),
             primitive: wgpu::PrimitiveState::default(),
             depth_stencil: None,

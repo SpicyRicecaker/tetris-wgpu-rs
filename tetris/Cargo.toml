@@ -10,7 +10,7 @@ homepage = "https://github.com/SpicyRicecaker/tetris-wgpu-rs"
 
 [dependencies]
 thomas = { path = "../thomas" }
-rand = "0.8.4"
+rand = "0.8.5"
 
 [build-dependencies]
 winres = "0.1.12"
